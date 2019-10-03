@@ -20,7 +20,7 @@ docker-compose up -d && chmod +x commands.sh
 ## Run tests
 
 ```sh
-./commands &#34;npm run test&#34;
+./commands "npm run test"
 ```
 
 ## Author

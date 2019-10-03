@@ -1,0 +1,35 @@
+version: '2.1'
+services:
+  env:
+    build: .
+    restart: always
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_started
+    volumes:
+      - ./:/app
+    links:
+      - db
+  db:
+    image: postgres:10.5
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: toth
+      POSTGRES_USER: toth_user
+      POSTGRES_PASSWORD: toth
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - '8088:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: db@toth.com.br
+      PGADMIN_DEFAULT_PASSWORD: toth
+    links:
+      - db
+    depends_on:
+      db:
+        condition: service_started

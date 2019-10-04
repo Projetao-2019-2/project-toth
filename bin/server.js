@@ -5,7 +5,7 @@
  */
 
 const app = require('../src/app')
-const debug = require('debug')('cordis:server')
+const debug = require('debug')('toth:server')
 const http = require('http')
 
 /**
@@ -65,11 +65,11 @@ function onError (error) {
     case 'EACCES':
       console.error(bind + ' requires elevated privileges')
       process.exit(1)
-      break
+      break;
     case 'EADDRINUSE':
       console.error(bind + ' is already in use')
       process.exit(1)
-      break
+      break;
     default:
       throw error
   }

@@ -10,8 +10,11 @@ services:
         condition: service_started
     volumes:
       - ./:/app
+      - /app/node_modules
     links:
       - db
+    env_file:
+      - ./.env
   db:
     image: postgres:10.5
     ports:

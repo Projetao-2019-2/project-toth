@@ -10,6 +10,7 @@ services:
         condition: service_started
     volumes:
       - ./:/app
+      - /app/node_modules
     links:
       - db
     env_file:

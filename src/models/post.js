@@ -8,9 +8,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   )
-  Post.associate = function (models) {
-    // associations can be defined here
+  Post.associate = models => {
+    Post.hasMany(models.PostFiles, { as: 'files' })
   }
 
   return Post
-};
+}

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-docker exec -ti projecttoth_env_1 $1
+docker exec -ti toth_env $1
 
 sudo chown -R $USER:$USER src/

@@ -3,17 +3,35 @@ const multer = require('multer')
 const crypto = require('crypto')
 
 const postsConfig = {
-  dest: path.resolve(__dirname, '..', '..', 'uploads', 'posts'),
+  dest: path.resolve(__dirname, '..', '..', 'public', 'uploads', 'posts'),
   storage: multer.diskStorage({
     destination: (req, file, callback) => {
       let dest = ''
       const type = file.mimetype.split('/')[0]
 
       if (type === 'video') {
-        dest = path.resolve(__dirname, '..', '..', 'uploads', 'posts', 'video')
+        dest = path.resolve(
+          __dirname,
+          '..',
+          '..',
+          'public',
+          'uploads',
+          'posts',
+          'video'
+        )
       } else {
-        dest = path.resolve(__dirname, '..', '..', 'uploads', 'posts', 'image')
+        dest = path.resolve(
+          __dirname,
+          '..',
+          '..',
+          'public',
+          'uploads',
+          'posts',
+          'image'
+        )
       }
+
+      file.type = type
 
       callback(null, dest)
     },

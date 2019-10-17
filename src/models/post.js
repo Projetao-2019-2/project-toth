@@ -9,7 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   Post.associate = models => {
-    Post.hasMany(models.PostFiles, { as: 'files' })
+    Post.hasMany(models.PostFiles, {
+      as: 'files',
+      onDelete: 'cascade',
+      hooks: true
+    })
   }
 
   return Post

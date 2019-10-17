@@ -39,6 +39,24 @@ class PostController {
 
     res.status(201).json({ post })
   }
+
+  async delete (req, res) {
+    const { id } = req.params
+
+    const post = await Post.findOne({ where: { id } })
+
+    if (!post === 0) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    const affected = await post.destroy()
+
+    if (!affected) {
+      return res.status(500).json({ message: 'Unable to delete the post' })
+    }
+
+    res.json({ message: 'Post deleted successfully!' })
+  }
 }
 
 module.exports = new PostController()

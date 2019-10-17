@@ -6,5 +6,7 @@ const { PostController } = require('../../controllers')
 
 router.get('/', PostController.list)
 router.post('/', multer(postsConfig).array('file'), PostController.create)
+router.put('/:id', multer(postsConfig).array('file'), PostController.update)
+router.delete('/:id', PostController.delete)
 
 module.exports = router

@@ -21,10 +21,59 @@ class PostController {
         .json({ message: 'You must provide either a text or an image/video' })
     }
 
-    const post = await Post.create(req.body)
+    const uploaded = files.map(file => {
+      const tipo = file.mimetype.split('/')[0]
+
+      file.path = `uploads/posts/${tipo}/${file.filename}`
+      file.tipo = tipo
+
+      return file
+    })
+
+    req.body.files = uploaded
+
+    const post = await Post.create(req.body, { include: ['files'] })
 
     if (!post) {
       return res.status(500).json({ message: 'Unable to create post' })
+    }
+
+    res.status(201).json({ post })
+  }
+
+  async update (req, res) {
+    const { id } = req.params
+    const { files } = req
+    const { texto, fileids } = req.body
+
+    if (
+      texto === undefined &&
+      files.length === 0 &&
+      (fileids === undefined || fileids.length === 0)
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'You must provide either a text or an image/video' })
+    }
+
+    const post = await Post.findOne({ where: { id }, include: ['files'] })
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    const { files: existing } = post
+
+    existing.forEach(file => {
+      if (!fileids.includes(file.id.toString())) {
+        file.destroy()
+      }
+    })
+
+    const updated = await post.update(req.body)
+
+    if (!updated) {
+      return res.status(500).json({ message: `Unable to update post ${id}` })
     }
 
     files.forEach(async file => {
@@ -33,11 +82,11 @@ class PostController {
       await PostFiles.create({
         path: `uploads/posts/${tipo}/${file.filename}`,
         tipo,
-        postid: post.id
+        postid: id
       })
     })
 
-    res.status(201).json({ post })
+    res.json({ post: updated })
   }
 
   async delete (req, res) {

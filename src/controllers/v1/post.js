@@ -11,6 +11,17 @@ class PostController {
     res.json({ posts })
   }
 
+  async view (req, res) {
+    const { id } = req.params
+    const post = await Post.findOne({ where: { id }, include: ['files'] })
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    res.json({ post })
+  }
+
   async create (req, res) {
     const { files } = req
     const { texto } = req.body

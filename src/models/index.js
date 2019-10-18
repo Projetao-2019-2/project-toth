@@ -1,12 +1,13 @@
 const fs = require('fs')
 const path = require('path')
 const Sequelize = require('sequelize')
-const config = require('../config/database')
+
+const env = process.env.NODE_ENV || 'dev'
+const config = require('../config/database')[env]
 const db = {}
 let sequelize = null
 
-if (process.env.DATABASE_URL) {
-  console.log(process.env.DATABASE_URL)
+if (config.use_env_variable) {
   // the application is executed on Heroku ... use the postgres database
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',

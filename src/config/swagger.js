@@ -10,6 +10,18 @@ const defs = {
   },
   servers: [
     {
+      url: 'https://{host}/{basePath}',
+      description: 'Prod server',
+      variables: {
+        basePath: {
+          default: 'v1'
+        },
+        host: {
+          default: 'project-toth.herokuapp.com'
+        }
+      }
+    },
+    {
       url: 'http://{host}/{basePath}',
       description: 'Dev server',
       variables: {

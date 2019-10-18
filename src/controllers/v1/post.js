@@ -1,4 +1,4 @@
-const { Post, PostFiles } = require('../../models')
+const { Post, sequelize } = require('../../models')
 
 class PostController {
   async list (req, res) {
@@ -73,31 +73,41 @@ class PostController {
       return res.status(404).json({ message: 'Post not found' })
     }
 
-    const { files: existing } = post
+    const transaction = await sequelize.transaction(async transaction => {
+      await Promise.all([
+        post.files.map(async file => {
+          if (!fileids.includes(file.id.toString())) {
+            await file.destroy({ transaction })
+          }
+        })
+      ])
 
-    existing.forEach(file => {
-      if (!fileids.includes(file.id.toString())) {
-        file.destroy()
-      }
+      await Promise.all([
+        files.map(async file => {
+          const tipo = file.mimetype.split('/')[0]
+
+          await post.createFile(
+            {
+              path: `uploads/posts/${tipo}/${file.filename}`,
+              tipo
+            },
+            { transaction }
+          )
+        })
+      ])
+
+      const updated = await post.update(req.body, { transaction })
+
+      return updated
     })
 
-    const updated = await post.update(req.body)
-
-    if (!updated) {
+    if (!transaction) {
       return res.status(500).json({ message: `Unable to update post ${id}` })
     }
 
-    files.forEach(async file => {
-      const tipo = file.mimetype.split('/')[0]
+    const p = await Post.findOne({ where: { id }, include: ['files'] })
 
-      await PostFiles.create({
-        path: `uploads/posts/${tipo}/${file.filename}`,
-        tipo,
-        postid: id
-      })
-    })
-
-    res.json({ post: updated })
+    res.json({ post: p })
   }
 
   async delete (req, res) {

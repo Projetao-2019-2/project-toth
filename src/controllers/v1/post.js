@@ -105,7 +105,7 @@ class PostController {
 
     const post = await Post.findOne({ where: { id } })
 
-    if (!post === 0) {
+    if (!post) {
       return res.status(404).json({ message: 'Post not found' })
     }
 
@@ -116,6 +116,21 @@ class PostController {
     }
 
     res.json({ message: 'Post deleted successfully!' })
+  }
+
+  async evaluate (req, res) {
+    const { id } = req.params
+    const { increment } = req.body
+
+    const post = await Post.findOne({ where: { id } })
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    await post.increment(increment)
+
+    res.json({ post })
   }
 }
 

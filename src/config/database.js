@@ -3,15 +3,20 @@ require('dotenv').config({
 })
 
 module.exports = {
-  host: process.env.DB_HOST,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  dialect: process.env.DB_DIALECT || 'postgres',
-  logging: false,
-  define: {
-    timestamps: true,
-    underscore: true
+  dev: {
+    host: process.env.DB_HOST,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    dialect: process.env.DB_DIALECT || 'postgres',
+    logging: false,
+    define: {
+      timestamps: true,
+      underscore: true
+    },
+    quoteIdentifiers: false
   },
-  quoteIdentifiers: false
+  prod: {
+    use_env_variable: 'DATABASE_URL'
+  }
 }

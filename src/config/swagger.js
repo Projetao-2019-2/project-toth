@@ -1,0 +1,32 @@
+const swagger = require('swagger-jsdoc')
+const path = require('path')
+const { version } = require('../../package.json')
+
+const defs = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Toth API',
+    version: `${version}`
+  },
+  servers: [
+    {
+      url: 'http://{host}/{basePath}',
+      description: 'Dev server',
+      variables: {
+        basePath: {
+          default: 'v1'
+        },
+        host: {
+          default: 'localhost:3000'
+        }
+      }
+    }
+  ]
+}
+
+const swaggerConfig = swagger({
+  swaggerDefinition: defs,
+  apis: [path.resolve(__dirname, '../controllers/v1/*.js')]
+})
+
+module.exports = { swaggerConfig }

@@ -3,13 +3,25 @@ const path = require('path')
 const Sequelize = require('sequelize')
 const config = require('../config/database')
 const db = {}
+let sequelize = null
 
-const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  config
-)
+if (process.env.DATABASE_URL) {
+  // the application is executed on Heroku ... use the postgres database
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    dialectOptions: {
+      ssl: true
+    } // false
+  })
+} else {
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  )
+}
 
 fs.readdirSync(__dirname)
   .filter(file => {

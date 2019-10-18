@@ -6,13 +6,20 @@ const db = {}
 let sequelize = null
 
 if (process.env.DATABASE_URL) {
+  console.log(process.env.DATABASE_URL)
   // the application is executed on Heroku ... use the postgres database
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
     dialectOptions: {
       ssl: true
-    } // false
+    },
+    logging: false,
+    define: {
+      timestamps: true,
+      underscore: true
+    },
+    quoteIdentifiers: false
   })
 } else {
   sequelize = new Sequelize(

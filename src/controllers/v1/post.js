@@ -1,4 +1,4 @@
-const { Post, PostFiles } = require('../../models')
+const { Post, sequelize } = require('../../models')
 
 class PostController {
   async list (req, res) {
@@ -9,6 +9,17 @@ class PostController {
     }
 
     res.json({ posts })
+  }
+
+  async view (req, res) {
+    const { id } = req.params
+    const post = await Post.findOne({ where: { id }, include: ['files'] })
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    res.json({ post })
   }
 
   async create (req, res) {
@@ -62,31 +73,41 @@ class PostController {
       return res.status(404).json({ message: 'Post not found' })
     }
 
-    const { files: existing } = post
+    const transaction = await sequelize.transaction(async transaction => {
+      await Promise.all([
+        post.files.map(async file => {
+          if (!fileids.includes(file.id.toString())) {
+            await file.destroy({ transaction })
+          }
+        })
+      ])
 
-    existing.forEach(file => {
-      if (!fileids.includes(file.id.toString())) {
-        file.destroy()
-      }
+      await Promise.all([
+        files.map(async file => {
+          const tipo = file.mimetype.split('/')[0]
+
+          await post.createFile(
+            {
+              path: `uploads/posts/${tipo}/${file.filename}`,
+              tipo
+            },
+            { transaction }
+          )
+        })
+      ])
+
+      const updated = await post.update(req.body, { transaction })
+
+      return updated
     })
 
-    const updated = await post.update(req.body)
-
-    if (!updated) {
+    if (!transaction) {
       return res.status(500).json({ message: `Unable to update post ${id}` })
     }
 
-    files.forEach(async file => {
-      const tipo = file.mimetype.split('/')[0]
+    const p = await Post.findOne({ where: { id }, include: ['files'] })
 
-      await PostFiles.create({
-        path: `uploads/posts/${tipo}/${file.filename}`,
-        tipo,
-        postid: id
-      })
-    })
-
-    res.json({ post: updated })
+    res.json({ post: p })
   }
 
   async delete (req, res) {
@@ -94,7 +115,7 @@ class PostController {
 
     const post = await Post.findOne({ where: { id } })
 
-    if (!post === 0) {
+    if (!post) {
       return res.status(404).json({ message: 'Post not found' })
     }
 
@@ -105,6 +126,21 @@ class PostController {
     }
 
     res.json({ message: 'Post deleted successfully!' })
+  }
+
+  async evaluate (req, res) {
+    const { id } = req.params
+    const { increment } = req.body
+
+    const post = await Post.findOne({ where: { id } })
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    await post.increment(increment)
+
+    res.json({ post })
   }
 }
 

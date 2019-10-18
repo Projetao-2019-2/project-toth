@@ -26,7 +26,10 @@ const defs = {
 
 const swaggerConfig = swagger({
   swaggerDefinition: defs,
-  apis: [path.resolve(__dirname, '../controllers/v1/*.js')]
+  apis: [
+    path.resolve(__dirname, '../controllers/v1/*.js'),
+    path.resolve(__dirname, '../schemas/**/*.yaml')
+  ]
 })
 
 module.exports = { swaggerConfig }

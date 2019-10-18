@@ -1,0 +1,27 @@
+components:
+  schemas:
+    BasicPostModel:
+      properties:
+        id:
+          type: integer
+        texto:
+          type: string
+        util:
+          type: integer
+        n_util:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ExtendedPostModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicPostModel'
+        - type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPostFileModel'

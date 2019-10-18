@@ -12,5 +12,6 @@ module.exports = {
   define: {
     timestamps: true,
     underscore: true
-  }
+  },
+  quoteIdentifiers: false
 }

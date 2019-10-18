@@ -2,6 +2,7 @@ version: '2.1'
 services:
   env:
     build: .
+    container_name: toth_env
     restart: always
     ports:
       - '3000:3000'
@@ -10,10 +11,14 @@ services:
         condition: service_started
     volumes:
       - ./:/app
+      - /app/node_modules
     links:
       - db
+    env_file:
+      - ./.env
   db:
     image: postgres:10.5
+    container_name: toth_db
     ports:
       - '5432:5432'
     environment:
@@ -22,6 +27,7 @@ services:
       POSTGRES_PASSWORD: toth
   pgadmin:
     image: dpage/pgadmin4
+    container_name: toth_pgadmin
     restart: always
     ports:
       - '8088:80'

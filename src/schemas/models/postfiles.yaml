@@ -1,0 +1,18 @@
+components:
+  schemas:
+    BasicPostFileModel:
+      properties:
+        id:
+          type: integer
+        path:
+          type: string
+        tipo:
+          type: string
+        postid:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

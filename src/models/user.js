@@ -9,10 +9,21 @@ module.exports = (sequelize, DataTypes) => {
     },
 
     nome: DataTypes.TEXT,
-    email: DataTypes.TEXT,
+    email: {
+      type: sequelize.STRING(100),
+      allowNull: false,
+      unique: true
+    },
+
     curso: DataTypes.TEXT,
+
     ies: DataTypes.TEXT,
-    senha: DataTypes.TEXT
+
+    senha: {
+      type: sequelize.STRING(50),
+      allowNull: false
+    }
+    
   });
 
   return User

@@ -12,13 +12,20 @@ module.exports = {
       },
   
       nome: DataTypes.TEXT,
-      email: DataTypes.TEXT,
+      email: {
+        type: sequelize.STRING(100),
+        allowNull: false,
+        unique: true
+      },
+  
       curso: DataTypes.TEXT,
+  
       ies: DataTypes.TEXT,
-      senha: DataTypes.TEXT,
-
-      createdAt: sequelize.DATE,
-      updatedAt: sequelize.DATE,
+  
+      senha: {
+        type: sequelize.STRING(50),
+        allowNull: false
+      }
 
     });
   },

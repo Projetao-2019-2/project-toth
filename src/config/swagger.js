@@ -17,7 +17,7 @@ const defs = {
           default: 'v1'
         },
         host: {
-          default: '  '
+          default: ' project-toth.herokuapp.com' '
         }
       }
     },

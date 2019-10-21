@@ -25,8 +25,15 @@ module.exports = {
       senha: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      createdat: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedat: {
+        allowNull: false,
+        type: Sequelize.DATE
       }
-
     });
   },
 

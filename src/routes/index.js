@@ -5,7 +5,7 @@ const swaggerUI = require('swagger-ui-express')
 const { swaggerConfig: swagger } = require('../config/swagger')
 
 const postRouter = require(`./${process.env.API_VERSION}/postRouter`)
-const QuestionRouter = require(`./${process.env.API_VERSION}/QuestionRouter`)
+const QuestionRouter = require(`./${process.env.API_VERSION}/questionRouter`)
 
 router.get('/', (req, res, next) => {
   res.status(418).json({ title: '🍵' })

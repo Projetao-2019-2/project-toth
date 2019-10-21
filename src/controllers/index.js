@@ -1,5 +1,4 @@
 const PostController = require(`./${process.env.API_VERSION}/post`)
-const QuestionController = require(`./${process.env.API_VERSION}/comment`)
+const QuestionController = require(`./${process.env.API_VERSION}/question`)
 
-module.exports = { PostController }
 module.exports = { PostController, QuestionController }

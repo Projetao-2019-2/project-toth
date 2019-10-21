@@ -1,0 +1,18 @@
+components:
+  schemas:
+    BasicCommentModel:
+      properties:
+        id:
+          type: integer
+        author:
+          type: string
+        text:
+          type: string
+        score:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

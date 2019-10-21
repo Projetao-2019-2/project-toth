@@ -1,36 +1,37 @@
-'use strict';
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    queryInterface.createTable('comments', {
+    return queryInterface.createTable('comments', {
       id: {
-        type: DataTypes.INTEGER,
+        type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true
       },
 
       author: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false
       },
-
 
       text: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false
       },
-
       score: {
-        type: DataTypes.INTEGER
+        type: Sequelize.INTEGER
       },
-      createdAt: Sequelize.DATE,
-      updatedAt: Sequelize.DATE,
-
+      createdat: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedat: {
+        allowNull: false,
+        type: Sequelize.DATE
+      }
     })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('comments');
+    return queryInterface.dropTable('comments')
   }
-};
+}

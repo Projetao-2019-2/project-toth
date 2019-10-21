@@ -5,6 +5,7 @@ const swaggerUI = require('swagger-ui-express')
 const { swaggerConfig: swagger } = require('../config/swagger')
 
 const postRouter = require(`./${process.env.API_VERSION}/postRouter`)
+const categoryRouter = require(`./${process.env.API_VERSION}/categoryRouter`)
 const commentRouter = require(`./${process.env.API_VERSION}/commentRouter`)
 const userRouter = require(`./${process.env.API_VERSION}/userRouter`)
 
@@ -13,6 +14,7 @@ router.get('/', (req, res, next) => {
 })
 
 router.use(`/${process.env.API_VERSION}/posts`, postRouter)
+router.use(`/${process.env.API_VERSION}/categories`, categoryRouter)
 router.use(`/${process.env.API_VERSION}/comments`, commentRouter)
 router.use(`/${process.env.API_VERSION}/users`, userRouter)
 

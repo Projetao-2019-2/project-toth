@@ -5,7 +5,7 @@ module.exports = {
     queryInterface.createTable('users', {
 
       id: {
-        type: sequelize.INTEGER(11),
+        type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
@@ -13,7 +13,7 @@ module.exports = {
   
       nome: DataTypes.TEXT,
       email: {
-        type: sequelize.STRING(100),
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true
       },
@@ -23,7 +23,7 @@ module.exports = {
       ies: DataTypes.TEXT,
   
       senha: {
-        type: sequelize.STRING(50),
+        type: DataTypes.STRING,
         allowNull: false
       }
 

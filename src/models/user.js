@@ -1,30 +1,42 @@
+const bcrypt = require('bcrypt')
+
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
-
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
+  const User = sequelize.define(
+    'User',
+    {
+      nome: DataTypes.TEXT,
+      email: {
+        type: DataTypes.STRING,
+        validate: { isEmail: true }
+      },
+      type: DataTypes.ENUM('admin', 'undergraduate', 'highschool'),
+      curso: DataTypes.TEXT,
+      ies: DataTypes.TEXT,
+      senha: DataTypes.STRING,
+      password: DataTypes.VIRTUAL
     },
-
-    nome: DataTypes.TEXT,
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-
-    curso: DataTypes.TEXT,
-
-    ies: DataTypes.TEXT,
-
-    senha: {
-      type: DataTypes.STRING,
-      allowNull: false
+    {
+      hooks: {
+        beforeSave: async user => {
+          if (user.password) {
+            user.senha = await bcrypt.hash(user.password, 8)
+          }
+        }
+      },
+      defaultScope: {
+        attributes: { exclude: ['senha'] }
+      },
+      scopes: {
+        withPassword: {
+          attributes: {}
+        }
+      }
     }
-    
-  });
+  )
+
+  User.prototype.checkPassword = function (password) {
+    return bcrypt.compare(password, this.senha)
+  }
 
   return User
 }

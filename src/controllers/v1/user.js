@@ -145,13 +145,19 @@ class UserController {
    *                  type: string
    */
   async create (req, res) {
-    const user = await User.create(req.body)
+    try {
+      const user = await User.create(req.body)
 
-    if (!user) {
-      return res.status(500).json({ message: 'Unable to create user' })
+      if (!user) {
+        return res.status(500).json({ message: 'Unable to create user' })
+      }
+
+      res.status(201).json({ user })
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: 'An account with the email informed already exists' })
     }
-
-    res.status(201).json({ user })
   }
 
   /**

@@ -1,0 +1,14 @@
+components:
+  schemas:
+    BasicQuestionModel:
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

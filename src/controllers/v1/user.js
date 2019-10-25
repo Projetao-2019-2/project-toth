@@ -155,7 +155,7 @@ class UserController {
         return res.status(500).json({ message: 'Unable to create user' })
       }
 
-      res.status(201).json({ user })
+      res.status(201).json({ user: user.returnObject() })
     } catch (err) {
       return res
         .status(500)

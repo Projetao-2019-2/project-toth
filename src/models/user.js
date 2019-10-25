@@ -38,5 +38,12 @@ module.exports = (sequelize, DataTypes) => {
     return bcrypt.compare(password, this.senha)
   }
 
+  User.prototype.returnObject = function () {
+    this.password = undefined
+    this.senha = undefined
+
+    return this
+  }
+
   return User
 }

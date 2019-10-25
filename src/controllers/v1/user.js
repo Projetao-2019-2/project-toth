@@ -170,6 +170,8 @@ class UserController {
    *    tags:
    *      - Users
    *    description: Updates a user instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -209,6 +211,15 @@ class UserController {
    *                user:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicUsersModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      404:
    *        description: The server was unable to find the user
    *        content:
@@ -255,6 +266,8 @@ class UserController {
    *    tags:
    *      - Users
    *    description: Deletes a user instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -266,6 +279,15 @@ class UserController {
    *    responses:
    *      200:
    *        description: Successfully deletes the user
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:

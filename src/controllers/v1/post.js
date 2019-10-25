@@ -101,6 +101,8 @@ class PostController {
    *    tags:
    *      - Posts
    *    description: Creates a post instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    requestBody:
@@ -129,6 +131,15 @@ class PostController {
    *                post:
    *                  type: object
    *                  $ref: '#/components/schemas/ExtendedPostModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      400:
    *        description: Attempt to create an empty post
    *        content:
@@ -185,6 +196,8 @@ class PostController {
    *    tags:
    *      - Posts
    *    description: Updates a post instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -226,6 +239,15 @@ class PostController {
    *                  $ref: '#/components/schemas/ExtendedPostModel'
    *      400:
    *        description: Attempt to make an empty post
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:
@@ -317,6 +339,8 @@ class PostController {
    *    tags:
    *      - Posts
    *    description: Deletes a post instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -328,6 +352,15 @@ class PostController {
    *    responses:
    *      200:
    *        description: Successfully deletes the post
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:

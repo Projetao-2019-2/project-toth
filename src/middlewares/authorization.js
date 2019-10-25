@@ -19,6 +19,13 @@ module.exports = async (req, res, next) => {
     return res.status(decoded.status).send({ message: decoded.message })
   }
 
+  const { access, expires } = decoded.obj
+  const now = new Date()
+
+  if (Math.abs(now.getTime() - access.getTime()) > expires) {
+    return res.status(401).send({ message: 'Token expired' })
+  }
+
   const user = decoded.obj
 
   req.user = user

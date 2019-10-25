@@ -4,6 +4,69 @@ const {
 } = require('../../services')
 
 class AuthController {
+  /**
+   * @swagger
+   * /auth/:
+   *   post:
+   *     tags:
+   *       - Auth
+   *     description: Log in an user to the system
+   *     consumes:
+   *       - application/json
+   *     produces:
+   *       - application/json
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               cpf:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *             required:
+   *               - cpf
+   *               - password
+   *     responses:
+   *       200:
+   *         description: A jwt token with some information of the user such as id, firstname, is_admin and device_uuid
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 token:
+   *                   type: string
+   *                   description: JWT Token
+   *       401:
+   *         description: The user typed the wrong password
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *       404:
+   *         description: The user informed doesn't exists in the database
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *       500:
+   *         description: An error occurred generating the token
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   */
   async login (req, res) {
     const { email, password } = req.body
 
@@ -24,7 +87,9 @@ class AuthController {
         email: user.email,
         tipo: user.type,
         curso: user.curso,
-        ies: user.ies
+        ies: user.ies,
+        access: new Date(),
+        expires: 86400
       },
       'nortuni'
     )

@@ -8,6 +8,8 @@ class CommentController {
    *    tags:
    *      - Comments
    *    description: Creates a comment instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    requestBody:
@@ -33,6 +35,15 @@ class CommentController {
    *                comment:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicCommentModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      500:
    *        description: The sever was unable to create the comment
    *        content:
@@ -157,6 +168,8 @@ class CommentController {
    *    tags:
    *      - Comments
    *    description: Updates a comment instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -188,6 +201,15 @@ class CommentController {
    *                  $ref: '#/components/schemas/BasicCommentModel'
    *      400:
    *        description: Attempt to make an empty comment
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:
@@ -242,6 +264,8 @@ class CommentController {
    *    tags:
    *      - Comments
    *    description: Deletes a comment instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -253,6 +277,15 @@ class CommentController {
    *    responses:
    *      200:
    *        description: Successfully deletes the comment
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:

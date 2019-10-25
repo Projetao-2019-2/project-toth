@@ -13,9 +13,12 @@ components:
           type: string
         ies:
           type: string
-        senha:
+        type:
           type: string
-          format: password
+          enum:
+            - admin
+            - undergraduate
+            - highschool
         createdAt:
           type: string
           format: date-time

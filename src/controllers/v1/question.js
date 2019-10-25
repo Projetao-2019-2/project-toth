@@ -8,6 +8,8 @@ class QuestionController {
    *    tags:
    *      - Questions
    *    description: Creates a question instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    requestBody:
@@ -31,6 +33,15 @@ class QuestionController {
    *                question:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicQuestionModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      500:
    *        description: The sever was unable to create the question
    *        content:
@@ -153,6 +164,8 @@ class QuestionController {
    *    tags:
    *      - Questions
    *    description: Updates a question instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -184,6 +197,15 @@ class QuestionController {
    *                  $ref: '#/components/schemas/BasicQuestionModel'
    *      400:
    *        description: Attempt to make an empty question
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:
@@ -238,6 +260,8 @@ class QuestionController {
    *    tags:
    *      - Questions
    *    description: Deletes a question instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -249,6 +273,15 @@ class QuestionController {
    *    responses:
    *      200:
    *        description: Successfully deletes the question
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:

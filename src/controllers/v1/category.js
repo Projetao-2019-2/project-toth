@@ -113,6 +113,8 @@ class CategoryController {
    *    tags:
    *      - Categories
    *    description: Creates a category instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    requestBody:
@@ -138,6 +140,24 @@ class CategoryController {
    *                category:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicCategoryModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      403:
+   *        description: You don't have the required permissions to do this request
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      500:
    *        description: The sever was unable to create the category
    *        content:
@@ -166,6 +186,8 @@ class CategoryController {
    *    tags:
    *      - Categories
    *    description: Updates a category instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -195,6 +217,24 @@ class CategoryController {
    *                category:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicCategoryModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      403:
+   *        description: You don't have the required permissions to do this request
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      500:
    *        description: The sever was unable to update the category
    *        content:
@@ -228,6 +268,8 @@ class CategoryController {
    *    tags:
    *      - Categories
    *    description: Deletes a category instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -239,6 +281,24 @@ class CategoryController {
    *    responses:
    *      200:
    *        description: Successfully deletes the category
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      403:
+   *        description: You don't have the required permissions to do this request
    *        content:
    *          application/json:
    *            schema:

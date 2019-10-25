@@ -118,7 +118,10 @@ class UserController {
    *                type: string
    *              ies:
    *                type: string
-   *              senha:
+   *              type:
+   *                type: string
+   *                enum: ['admin', 'undergraduate', 'highschool']
+   *              password:
    *                type: string
    *                format: password
    *    responses:
@@ -145,13 +148,19 @@ class UserController {
    *                  type: string
    */
   async create (req, res) {
-    const user = await User.create(req.body)
+    try {
+      const user = await User.create(req.body)
 
-    if (!user) {
-      return res.status(500).json({ message: 'Unable to create user' })
+      if (!user) {
+        return res.status(500).json({ message: 'Unable to create user' })
+      }
+
+      res.status(201).json({ user: user.returnObject() })
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: 'An account with the email informed already exists' })
     }
-
-    res.status(201).json({ user })
   }
 
   /**
@@ -161,6 +170,8 @@ class UserController {
    *    tags:
    *      - Users
    *    description: Updates a user instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -200,6 +211,15 @@ class UserController {
    *                user:
    *                  type: object
    *                  $ref: '#/components/schemas/BasicUsersModel'
+   *      401:
+   *        description: Authorization information is missing or invalid.
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
    *      404:
    *        description: The server was unable to find the user
    *        content:
@@ -246,6 +266,8 @@ class UserController {
    *    tags:
    *      - Users
    *    description: Deletes a user instance
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -257,6 +279,15 @@ class UserController {
    *    responses:
    *      200:
    *        description: Successfully deletes the user
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      401:
+   *        description: Authorization information is missing or invalid.
    *        content:
    *          application/json:
    *            schema:

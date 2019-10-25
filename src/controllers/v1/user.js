@@ -118,7 +118,10 @@ class UserController {
    *                type: string
    *              ies:
    *                type: string
-   *              senha:
+   *              type:
+   *                type: string
+   *                enum: ['admin', 'undergraduate', 'highschool']
+   *              password:
    *                type: string
    *                format: password
    *    responses:

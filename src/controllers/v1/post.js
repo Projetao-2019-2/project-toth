@@ -35,8 +35,10 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
-    const posts = await Post.findAll({ include: ['files'] })
+  async list(req, res) {
+    const posts = await Post.findAll({
+      include: ['files', 'author', 'category', 'question']
+    })
 
     if (!posts) {
       return res.status(500).json({ message: 'Unable to get list of posts' })
@@ -83,9 +85,12 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     const { id } = req.params
-    const post = await Post.findOne({ where: { id }, include: ['files'] })
+    const post = await Post.findOne({
+      where: { id },
+      include: ['files', 'author', 'category', 'question']
+    })
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
@@ -113,11 +118,17 @@ class PostController {
    *            properties:
    *              texto:
    *                type: string
+   *              categoryid:
+   *                type: integer
+   *              questionid:
+   *                type: integer
    *              file:
    *                type: array
    *                items:
    *                  type: string
    *                  format: binary
+   *              required:
+   *                - categoryid
    *    responses:
    *      201:
    *        description: Successfully creates a post
@@ -159,14 +170,21 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
+  async create(req, res) {
     const { files } = req
     const { texto } = req.body
+    const { id: userid } = req.user
 
     if (texto === undefined && files.length === 0) {
       return res
         .status(400)
         .json({ message: 'You must provide either a text or an image/video' })
+    }
+
+    if (req.body.categoryid === undefined) {
+      return res
+        .status(400)
+        .json({ message: 'You must provide the category of the post' })
     }
 
     const uploaded = files.map(file => {
@@ -179,6 +197,7 @@ class PostController {
     })
 
     req.body.files = uploaded
+    req.body.userid = userid
 
     const post = await Post.create(req.body, { include: ['files'] })
 
@@ -274,7 +293,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     const { id } = req.params
     const { files } = req
     const { texto, fileids } = req.body
@@ -387,7 +406,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     const { id } = req.params
 
     const post = await Post.findOne({ where: { id } })
@@ -454,7 +473,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async evaluate (req, res) {
+  async evaluate(req, res) {
     const { id } = req.params
     const { increment } = req.body
 

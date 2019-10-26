@@ -4,6 +4,8 @@ const QuestionController = require(`./${process.env.API_VERSION}/question`)
 const CategoryController = require(`./${process.env.API_VERSION}/category`)
 const CommentController = require(`./${process.env.API_VERSION}/comment`)
 const UserController = require(`./${process.env.API_VERSION}/user`)
+const NotificationController = require(`./${process.env.API_VERSION}/notification`)
+
 
 module.exports = {
   AuthController,
@@ -11,5 +13,6 @@ module.exports = {
   QuestionController,
   CategoryController,
   CommentController,
-  UserController
+  UserController,
+  NotificationController
 }

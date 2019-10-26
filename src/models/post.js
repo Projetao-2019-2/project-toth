@@ -4,7 +4,10 @@ module.exports = (sequelize, DataTypes) => {
     {
       texto: DataTypes.TEXT,
       util: DataTypes.INTEGER,
-      n_util: DataTypes.INTEGER
+      n_util: DataTypes.INTEGER,
+      userid: DataTypes.INTEGER,
+      categoryid: DataTypes.INTEGER,
+      questionid: DataTypes.INTEGER
     },
     {}
   )
@@ -13,6 +16,15 @@ module.exports = (sequelize, DataTypes) => {
       as: 'files',
       onDelete: 'cascade',
       hooks: true
+    })
+    Post.belongsTo(models.User, { as: 'author', foreignKey: 'userid' })
+    Post.belongsTo(models.Category, {
+      as: 'category',
+      foreignKey: 'categoryid'
+    })
+    Post.belongsTo(models.Question, {
+      as: 'question',
+      foreignKey: 'questionid'
     })
   }
 

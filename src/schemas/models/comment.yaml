@@ -4,11 +4,13 @@ components:
       properties:
         id:
           type: integer
-        author:
-          type: string
         text:
           type: string
-        score:
+        userid:
+          type: integer
+        postid:
+          type: integer
+        parentid:
           type: integer
         createdAt:
           type: string
@@ -16,3 +18,21 @@ components:
         updatedAt:
           type: string
           format: date-time
+    ExtendedCommentModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicCommentModel'
+        - type: object
+          properties:
+            post:
+              type: object
+              $ref: '#/components/schemas/BasicPostModel'
+            author:
+              type: object
+              $ref: '#/components/schemas/BasicUsersModel'
+            parent:
+              type: object
+              $ref: '#/components/schemas/BasicCommentModel'
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicCommentModel'

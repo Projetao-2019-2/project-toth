@@ -40,3 +40,12 @@ components:
             question:
               type: object
               $ref: '#/components/schemas/BasicQuestionModel'
+    ExtendedPostViewModel:
+      allOf:
+        - $ref: '#/components/schemas/ExtendedPostModel'
+        - type: object
+          properties:
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicCommentModel'

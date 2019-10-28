@@ -10,9 +10,11 @@ const questionRouter = require(`./${process.env.API_VERSION}/questionRouter`)
 const categoryRouter = require(`./${process.env.API_VERSION}/categoryRouter`)
 const commentRouter = require(`./${process.env.API_VERSION}/commentRouter`)
 const userRouter = require(`./${process.env.API_VERSION}/userRouter`)
+const userRouter = require(`./${process.env.API_VERSION}/AchievementsRouter`)
+
 
 router.get('/', (req, res, next) => {
-  res.status(418).json({ title: '🍵' })
+    res.status(418).json({ title: '🍵' })
 })
 
 router.use(`/${process.env.API_VERSION}/auth`, authRouter)
@@ -21,16 +23,17 @@ router.use(`/${process.env.API_VERSION}/questions`, questionRouter)
 router.use(`/${process.env.API_VERSION}/categories`, categoryRouter)
 router.use(`/${process.env.API_VERSION}/comments`, commentRouter)
 router.use(`/${process.env.API_VERSION}/users`, userRouter)
+router.use(`/${process.env.API_VERSION}/Achievements`, AchievementsRouter)
 
 router.use(`/${process.env.API_VERSION}/swagger.json`, (req, res) => {
-  res.setHeader('Content-Type', 'application/json')
-  res.send(swagger)
+    res.setHeader('Content-Type', 'application/json')
+    res.send(swagger)
 })
 
 router.use(
-  `/${process.env.API_VERSION}/docs`,
-  swaggerUI.serve,
-  swaggerUI.setup(swagger)
+    `/${process.env.API_VERSION}/docs`,
+    swaggerUI.serve,
+    swaggerUI.setup(swagger)
 )
 
 module.exports = router

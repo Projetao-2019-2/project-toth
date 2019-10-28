@@ -1,4 +1,4 @@
-const { Post, User, Question, sequelize } = require('../../models')
+const { Comment, Post, User, Question, sequelize } = require('../../models')
 
 class PostController {
   /**
@@ -119,7 +119,7 @@ class PostController {
    *      200:
    *        description: Successfully retrieves the post queried
    *        schema:
-   *          $ref: '#/components/schemas/ExtendedPostModel'
+   *          $ref: '#/components/schemas/ExtendedPostViewModel'
    *        content:
    *          application/json:
    *            schema:
@@ -127,7 +127,7 @@ class PostController {
    *              properties:
    *                post:
    *                  type: object
-   *                  $ref: '#/components/schemas/ExtendedPostModel'
+   *                  $ref: '#/components/schemas/ExtendedPostViewModel'
    *      404:
    *        description: The server was unable to find the post
    *        content:
@@ -142,7 +142,7 @@ class PostController {
     const { id } = req.params
     const post = await Post.findOne({
       where: { id },
-      include: ['files', 'author', 'category', 'question']
+      include: ['files', 'author', 'category', 'question', 'comments']
     })
 
     if (!post) {
@@ -150,6 +150,70 @@ class PostController {
     }
 
     res.json({ post })
+  }
+
+  /**
+   * @swagger
+   * /posts/{id}/comments:
+   *  get:
+   *    tags:
+   *      - Posts
+   *    description: Returns the comments of a specific post queried by id
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        schema:
+   *          type: integer
+   *        required: true
+   *      - name: pag
+   *        in: query
+   *        schema:
+   *          type: string
+   *        description: Page number for pagination
+   *    responses:
+   *      200:
+   *        description: Successfully the comments of retrieves the post queried
+   *        schema:
+   *          $ref: '#/components/schemas/BasicCommentModel'
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                comment:
+   *                  type: object
+   *                  $ref: '#/components/schemas/BasicCommentModel'
+   *      404:
+   *        description: The server was unable to find the post
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   */
+  async comments(req, res) {
+    const { id } = req.params
+    const { pag = 1 } = req.query
+    const pageSize = 30
+    const offset = (pag - 1) * pageSize
+    const limit = offset + pageSize
+
+    const comments = await Comment.findAll({
+      offset,
+      limit,
+      where: { postid: id },
+      include: ['author']
+    })
+
+    if (!comments) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    res.json({ comments })
   }
 
   /**

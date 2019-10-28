@@ -8,6 +8,7 @@ const { PostController } = require('../../controllers')
 
 router.get('/', PostController.list)
 router.get('/:id', PostController.view)
+router.get('/:id/comments', PostController.comments)
 router.post(
   '/',
   authorization,

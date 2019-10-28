@@ -18,12 +18,8 @@ class CommentController {
    *          schema:
    *            type: object
    *            properties:
-   *              userid:
-   *                type: integer
-   *              postid:
-   *                type: integer
-   *              parentid:
-   *                type: integer
+   *              author:
+   *                type: string
    *              text:
    *                type: string
    *    responses:
@@ -58,12 +54,12 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async create(req, res) {
-    const { id: userid } = req.user
-
-    req.body.userid = userid
-
-    const comment = await Comment.create(req.body)
+  async create (req, res) {
+    const comment = await Comment.create({
+      author: req.body.author,
+      text: req.body.text,
+      postId: req.body.postId
+    })
 
     if (!comment) {
       return res.status('500').json({ message: "Couldn't create comment." })
@@ -85,7 +81,7 @@ class CommentController {
    *      200:
    *        description: Successfully retrives the list of comments
    *        schema:
-   *          $ref: '#/components/schemas/ExtendedCommentModel'
+   *          $ref: '#/components/schemas/BasicCommentModel'
    *        content:
    *          application/json:
    *            schema:
@@ -95,7 +91,7 @@ class CommentController {
    *                  type: array
    *                  items:
    *                    type: object
-   *                    $ref: '#/components/schemas/ExtendedCommentModel'
+   *                    $ref: '#/components/schemas/BasicCommentModel'
    *      500:
    *        description: The server was unable to get the list of comments
    *        content:
@@ -106,7 +102,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async list(req, res) {
+  async list (req, res) {
     const comments = await Comment.findAll()
 
     if (!comments) {
@@ -135,7 +131,7 @@ class CommentController {
    *      200:
    *        description: Successfully retrieves the comment queried
    *        schema:
-   *          $ref: '#/components/schemas/ExtendedCommentModel'
+   *          $ref: '#/components/schemas/BasicCommentModel'
    *        content:
    *          application/json:
    *            schema:
@@ -143,7 +139,7 @@ class CommentController {
    *              properties:
    *                comment:
    *                  type: object
-   *                  $ref: '#/components/schemas/ExtendedCommentModel'
+   *                  $ref: '#/components/schemas/BasicCommentModel'
    *      404:
    *        description: The server was unable to find the comment
    *        content:
@@ -154,12 +150,9 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async view(req, res) {
+  async view (req, res) {
     const { id } = req.params
-    const comment = await Comment.findOne({
-      where: { id },
-      include: ['post', 'author', 'parent', 'children']
-    })
+    const comment = await Comment.findOne({ where: { id } })
 
     if (!comment) {
       return res.status('404').json({ message: 'Comment not found.' })
@@ -243,7 +236,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async update(req, res) {
+  async update (req, res) {
     const { id } = req.params
     const { text } = req.body
 
@@ -319,7 +312,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async delete(req, res) {
+  async delete (req, res) {
     const { id } = req.params
     const deleted = await Comment.destroy({ where: { id: id } })
 

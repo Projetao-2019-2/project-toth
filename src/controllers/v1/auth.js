@@ -21,7 +21,7 @@ class AuthController {
    *           schema:
    *             type: object
    *             properties:
-   *               email:
+   *               cpf:
    *                 type: string
    *               password:
    *                 type: string
@@ -30,7 +30,7 @@ class AuthController {
    *               - password
    *     responses:
    *       200:
-   *         description: A jwt token with user information valid for a day
+   *         description: A jwt token with some information of the user such as id, firstname, is_admin and device_uuid
    *         content:
    *           application/json:
    *             schema:
@@ -67,7 +67,7 @@ class AuthController {
    *                 message:
    *                   type: string
    */
-  async login(req, res) {
+  async login (req, res) {
     const { email, password } = req.body
 
     const user = await User.scope('withPassword').findOne({ where: { email } })

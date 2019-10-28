@@ -8,6 +8,7 @@ router.post('/', authorization, CommentController.create)
 router.get('/', CommentController.list)
 router.get('/:id', CommentController.view)
 router.put('/:id', authorization, CommentController.update)
+router.patch('/:id', authorization, CommentController.update)
 router.delete('/:id', authorization, CommentController.delete)
 
 module.exports = router

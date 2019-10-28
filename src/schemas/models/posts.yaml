@@ -10,12 +10,6 @@ components:
           type: integer
         n_util:
           type: integer
-        userid:
-          type: integer
-        categoryid:
-          type: integer
-        questionid:
-          type: integer
         createdAt:
           type: string
           format: date-time
@@ -31,21 +25,3 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BasicPostFileModel'
-            author:
-              type: object
-              $ref: '#/components/schemas/BasicUsersModel'
-            category:
-              type: object
-              $ref: '#/components/schemas/BasicCategoryModel'
-            question:
-              type: object
-              $ref: '#/components/schemas/BasicQuestionModel'
-    ExtendedPostViewModel:
-      allOf:
-        - $ref: '#/components/schemas/ExtendedPostModel'
-        - type: object
-          properties:
-            comments:
-              type: array
-              items:
-                $ref: '#/components/schemas/BasicCommentModel'

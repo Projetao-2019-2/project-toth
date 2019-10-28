@@ -1,4 +1,4 @@
-const { Comment, Post, User, Question, sequelize } = require('../../models')
+const { Post, sequelize } = require('../../models')
 
 class PostController {
   /**
@@ -10,22 +10,6 @@ class PostController {
    *    description: Returns a list with all posts
    *    produces:
    *      - application/json
-   *    parameters:
-   *      - name: search
-   *        in: query
-   *        schema:
-   *          type: string
-   *        description: Text (course/ies) searched by the user
-   *      - name: tema
-   *        in: query
-   *        schema:
-   *          type: string
-   *        description: Themes (categories) ids separated by comma (,) for filtering post results
-   *      - name: pag
-   *        in: query
-   *        schema:
-   *          type: string
-   *        description: Page number for pagination
    *    responses:
    *      200:
    *        description: Successfully retrives the list of posts
@@ -51,47 +35,8 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async list(req, res) {
-    const { search, tema, pag = 1 } = req.query
-    const pageSize = 30
-    const offset = (pag - 1) * pageSize
-    const limit = offset + pageSize
-
-    let query = true
-    let where = {}
-    let posts = []
-
-    if (tema) {
-      where.categoryid = tema.split(',')
-    }
-
-    if (search !== undefined) {
-      const fts = await sequelize.query(
-        `SELECT p.* FROM ${Post.tableName} p
-        LEFT JOIN ${User.tableName} u ON p.userid = u.id
-        LEFT JOIN ${Question.tableName} q ON p.questionid = q.id
-        WHERE p._search @@ to_tsquery('Portuguese', :query) OR
-        u._search @@ to_tsquery('Portuguese', :query) OR
-        q._search @@ to_tsquery('Portuguese', :query);`,
-        { model: Post, replacements: { query: search.replace(/\s+/g, '|') } }
-      )
-
-      if (fts.length > 0) {
-        where.id = fts.map(item => item.id)
-      } else {
-        query = false
-      }
-    }
-
-    if (query) {
-      posts = await Post.findAll({
-        limit,
-        offset,
-        where,
-        order: [['util', 'DESC'], ['n_util', 'ASC'], ['id', 'DESC']],
-        include: ['files', 'author', 'category', 'question']
-      })
-    }
+  async list (req, res) {
+    const posts = await Post.findAll({ include: ['files'] })
 
     if (!posts) {
       return res.status(500).json({ message: 'Unable to get list of posts' })
@@ -119,7 +64,7 @@ class PostController {
    *      200:
    *        description: Successfully retrieves the post queried
    *        schema:
-   *          $ref: '#/components/schemas/ExtendedPostViewModel'
+   *          $ref: '#/components/schemas/ExtendedPostModel'
    *        content:
    *          application/json:
    *            schema:
@@ -127,7 +72,7 @@ class PostController {
    *              properties:
    *                post:
    *                  type: object
-   *                  $ref: '#/components/schemas/ExtendedPostViewModel'
+   *                  $ref: '#/components/schemas/ExtendedPostModel'
    *      404:
    *        description: The server was unable to find the post
    *        content:
@@ -138,82 +83,15 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async view(req, res) {
+  async view (req, res) {
     const { id } = req.params
-    const post = await Post.findOne({
-      where: { id },
-      include: ['files', 'author', 'category', 'question', 'comments']
-    })
+    const post = await Post.findOne({ where: { id }, include: ['files'] })
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
     }
 
     res.json({ post })
-  }
-
-  /**
-   * @swagger
-   * /posts/{id}/comments:
-   *  get:
-   *    tags:
-   *      - Posts
-   *    description: Returns the comments of a specific post queried by id
-   *    produces:
-   *      - application/json
-   *    parameters:
-   *      - name: id
-   *        in: path
-   *        schema:
-   *          type: integer
-   *        required: true
-   *      - name: pag
-   *        in: query
-   *        schema:
-   *          type: string
-   *        description: Page number for pagination
-   *    responses:
-   *      200:
-   *        description: Successfully the comments of retrieves the post queried
-   *        schema:
-   *          $ref: '#/components/schemas/BasicCommentModel'
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                comment:
-   *                  type: object
-   *                  $ref: '#/components/schemas/BasicCommentModel'
-   *      404:
-   *        description: The server was unable to find the post
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   */
-  async comments(req, res) {
-    const { id } = req.params
-    const { pag = 1 } = req.query
-    const pageSize = 30
-    const offset = (pag - 1) * pageSize
-    const limit = offset + pageSize
-
-    const comments = await Comment.findAll({
-      offset,
-      limit,
-      where: { postid: id },
-      include: ['author']
-    })
-
-    if (!comments) {
-      return res.status(404).json({ message: 'Post not found' })
-    }
-
-    res.json({ comments })
   }
 
   /**
@@ -235,17 +113,11 @@ class PostController {
    *            properties:
    *              texto:
    *                type: string
-   *              categoryid:
-   *                type: integer
-   *              questionid:
-   *                type: integer
    *              file:
    *                type: array
    *                items:
    *                  type: string
    *                  format: binary
-   *              required:
-   *                - categoryid
    *    responses:
    *      201:
    *        description: Successfully creates a post
@@ -287,21 +159,14 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async create(req, res) {
+  async create (req, res) {
     const { files } = req
     const { texto } = req.body
-    const { id: userid } = req.user
 
     if (texto === undefined && files.length === 0) {
       return res
         .status(400)
         .json({ message: 'You must provide either a text or an image/video' })
-    }
-
-    if (req.body.categoryid === undefined) {
-      return res
-        .status(400)
-        .json({ message: 'You must provide the category of the post' })
     }
 
     const uploaded = files.map(file => {
@@ -314,7 +179,6 @@ class PostController {
     })
 
     req.body.files = uploaded
-    req.body.userid = userid
 
     const post = await Post.create(req.body, { include: ['files'] })
 
@@ -410,7 +274,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async update(req, res) {
+  async update (req, res) {
     const { id } = req.params
     const { files } = req
     const { texto, fileids } = req.body
@@ -523,7 +387,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async delete(req, res) {
+  async delete (req, res) {
     const { id } = req.params
 
     const post = await Post.findOne({ where: { id } })
@@ -590,7 +454,7 @@ class PostController {
    *                message:
    *                  type: string
    */
-  async evaluate(req, res) {
+  async evaluate (req, res) {
     const { id } = req.params
     const { increment } = req.body
 

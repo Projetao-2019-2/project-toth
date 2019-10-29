@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     visualizado: DataTypes.BOOLEAN
   }, {});
   Notification.associate = function(models) {
-    // associations can be defined here
+    Notification.belongsTo(models.User, { as: 'receiver', foreignKey: 'userid' })    
   };
   return Notification;
 };

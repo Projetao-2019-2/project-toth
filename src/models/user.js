@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
 
+  User.associate = function(models) {
+    User.hasMany(models.Notification, { as: 'notifications' })    
+  };
+
   User.prototype.checkPassword = function (password) {
     return bcrypt.compare(password, this.senha)
   }

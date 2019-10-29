@@ -124,6 +124,12 @@ class UserController {
    *              password:
    *                type: string
    *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
    *    responses:
    *      201:
    *        description: Successfully creates a user
@@ -198,6 +204,12 @@ class UserController {
    *              senha:
    *                type: string
    *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
    *    responses:
    *      200:
    *        description: Successfully updates a user

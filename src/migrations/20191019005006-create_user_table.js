@@ -23,6 +23,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+
+      facebook_link: Sequelize.STRING,
+      instagram_link: Sequelize.STRING,
+      twitter_link: Sequelize.STRING,
+
       createdat: {
         allowNull: false,
         type: Sequelize.DATE

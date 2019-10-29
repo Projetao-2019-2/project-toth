@@ -13,7 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       curso: DataTypes.TEXT,
       ies: DataTypes.TEXT,
       senha: DataTypes.STRING,
-      password: DataTypes.VIRTUAL
+      password: DataTypes.VIRTUAL,
+      facebook_link: DataTypes.STRING,
+      instagram_link: DataTypes.STRING,
+      twitter_link: DataTypes.STRING,
     },
     {
       hooks: {

@@ -69,4 +69,55 @@ const postsConfig = {
   }
 }
 
-module.exports = { postsConfig }
+const usersConfig = {
+  dest: path.resolve(__dirname, '..', '..', 'public', 'uploads', 'users'),
+  storage: multer.diskStorage({
+    destination: (req, file, callback) => {
+      let dest = ''
+      const type = file.mimetype.split('/')[0]
+
+      dest = path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'public',
+        'uploads',
+        'users',
+        'avatars'
+      )
+
+      file.type = type
+
+      callback(null, dest)
+    },
+    filename: (req, file, callback) => {
+      crypto.randomBytes(16, (err, hash) => {
+        if (err) {
+          callback(err)
+        }
+
+        const filename = `${hash.toString('hex')}_${file.originalname}`
+
+        callback(null, filename)
+      })
+    }
+  }),
+  limits: {
+    fileSize: 100 * 1024
+  },
+  fileFilter: (req, file, callback) => {
+    const allowedMimes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ]
+
+    if (!allowedMimes.includes(file.mimetype)) {
+      callback(new Error('Unsupported Media Type'))
+    }
+
+    callback(null, true)
+  }
+}
+
+module.exports = { postsConfig, usersConfig }

@@ -244,8 +244,8 @@ class PostController {
    *                items:
    *                  type: string
    *                  format: binary
-   *              required:
-   *                - categoryid
+   *            required:
+   *              - categoryid
    *    responses:
    *      201:
    *        description: Successfully creates a post
@@ -298,11 +298,16 @@ class PostController {
         .json({ message: 'You must provide either a text or an image/video' })
     }
 
-    if (req.body.categoryid === undefined) {
+    if (req.body.categoryid === undefined || req.body.categoryid === '') {
       return res
         .status(400)
         .json({ message: 'You must provide the category of the post' })
     }
+
+    req.body.questionid =
+      req.body.questionid === undefined || req.body.questionid === ''
+        ? null
+        : req.body.questionid
 
     const uploaded = files.map(file => {
       const tipo = file.mimetype.split('/')[0]

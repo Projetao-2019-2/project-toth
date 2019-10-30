@@ -35,7 +35,7 @@ class CategoryController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
+  async list(req, res) {
     try {
       const categories = await Category.findAll()
       return res.status(200).json({ categories })
@@ -91,7 +91,7 @@ class CategoryController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     try {
       const { id } = req.params
       const category = await Category.findOne({
@@ -124,6 +124,8 @@ class CategoryController {
    *            type: object
    *            properties:
    *              name:
+   *                type: string
+   *              description:
    *                type: string
    *              color:
    *                type: string
@@ -168,7 +170,7 @@ class CategoryController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
+  async create(req, res) {
     try {
       const category = await Category.create(req.body)
       return res.status(201).json({
@@ -202,7 +204,11 @@ class CategoryController {
    *          schema:
    *            type: object
    *            properties:
-   *              text:
+   *              name:
+   *                type: string
+   *              description:
+   *                type: string
+   *              color:
    *                type: string
    *    responses:
    *      200:
@@ -245,7 +251,7 @@ class CategoryController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     try {
       const { id } = req.params
       const [updated] = await Category.update(req.body, {
@@ -316,7 +322,7 @@ class CategoryController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     try {
       const { id } = req.params
       const deleted = await Category.destroy({
@@ -331,4 +337,5 @@ class CategoryController {
     }
   }
 }
+
 module.exports = new CategoryController()

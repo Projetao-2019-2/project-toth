@@ -36,7 +36,7 @@ class UserController {
    *                  type: string
    */
   async list (req, res) {
-    const users = await User.findAll()
+    const users = await User.findAll({ include: ['avatar'] })
 
     if (!users) {
       return res.status(500).json({ message: 'Unable to get list of users' })
@@ -155,8 +155,20 @@ class UserController {
    */
   async create (req, res) {
     try {
-      const user = await User.create(req.body)
+      const { avatar } = req
 
+      const uploaded = avatar.map(img => {
+        const type = img.mimetype.split('/')[0]
+  
+        img.path = `uploads/users/avatars/${img.filename}`
+        img.type = type
+  
+        return img
+      })
+  
+      req.body.avatar = uploaded
+
+      const user = await User.create(req.body, { include: ['avatar'] })
       if (!user) {
         return res.status(500).json({ message: 'Unable to create user' })
       }
@@ -192,6 +204,11 @@ class UserController {
    *          schema:
    *            type: object
    *            properties:
+   *              avatarids:
+   *                type: array
+   *                description: The ids of the already existing avatars in the post
+   *                items:
+   *                  type: integer
    *              nome:
    *                type: string
    *              email:

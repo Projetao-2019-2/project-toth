@@ -270,6 +270,7 @@ class UserController {
    */
   async update (req, res) {
     const { id } = req.params
+    const { avatar } = req
 
     const user = await User.findOne({ where: { id } })
 
@@ -277,7 +278,18 @@ class UserController {
       return res.status(404).json({ message: 'User not found' })
     }
 
-    const updated = await user.update(req.body)
+    const uploaded = avatar.map(img => {
+      const type = img.mimetype.split('/')[0]
+
+      img.path = `uploads/users/avatars/${img.filename}`
+      img.type = type
+
+      return img
+    })
+
+    req.body.avatar = uploaded
+
+    const updated = await user.update(req.body, { include: ['avatar']})
 
     if (!updated) {
       return res.status(500).json({ message: `Unable to update user ${id}` })

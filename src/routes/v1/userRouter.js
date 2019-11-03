@@ -18,7 +18,6 @@ router.put(
   multer(usersConfig).single('file'),
   UserController.update
 )
-router.patch('/:id', authorization, UserController.update)
 router.delete('/:id', authorization, UserController.delete)
 
 module.exports = router

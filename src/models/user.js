@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt')
 const fs = require('fs')
 const path = require('path')
 
+const { S3Service } = require('../services')
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
@@ -30,16 +32,24 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
         afterDestroy: (instance, options) => {
-          const filepath = path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'public',
-            instance.imagepath
-          )
-
           try {
-            fs.unlinkSync(filepath)
+            if (process.env.NODE_ENV === 'prod') {
+              const response = S3Service.destroy(`users/${instance.name}`)
+
+              if (response.status === 500) {
+                console.error(response.message)
+              }
+            } else {
+              const filepath = path.resolve(
+                __dirname,
+                '..',
+                '..',
+                'public',
+                instance.imagepath
+              )
+
+              fs.unlinkSync(filepath)
+            }
           } catch (err) {
             console.error(err)
           }

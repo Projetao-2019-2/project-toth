@@ -4,6 +4,8 @@ components:
       properties:
         id:
           type: integer
+        name:
+          type: string
         path:
           type: string
         tipo:

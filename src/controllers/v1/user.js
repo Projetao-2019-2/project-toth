@@ -3,7 +3,7 @@ const { User } = require('../../models')
 const fs = require('fs')
 const path = require('path')
 
-const { S3Service } = require('../services')
+const { S3Service } = require('../../services')
 
 class UserController {
   /**

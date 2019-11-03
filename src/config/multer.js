@@ -101,33 +101,54 @@ const postsConfig = {
 
 const usersConfig = {
   dest: path.resolve(__dirname, '..', '..', 'public', 'uploads', 'users'),
-  storage: multer.diskStorage({
-    destination: (req, file, callback) => {
-      const dest = path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'public',
-        'uploads',
-        'users'
-      )
+  storage:
+    process.env.NODE_ENV === 'prod'
+      ? multerS3({
+          s3: S3,
+          bucket: bucket,
+          acl: 'public-read',
+          contentType: multerS3.AUTO_CONTENT_TYPE,
+          key: function(req, file, callback) {
+            crypto.randomBytes(16, (err, hash) => {
+              if (err) {
+                callback(err)
+              }
 
-      callback(null, dest)
-    },
-    filename: (req, file, callback) => {
-      crypto.randomBytes(16, (err, hash) => {
-        if (err) {
-          callback(err)
-        }
+              const filename = `${hash.toString('hex')}_${file.originalname}`
 
-        const filename = `${hash.toString('hex')}_${file.originalname}`
+              file.filename = filename
 
-        file.location = `uploads/users/${filename}`
+              callback(null, `users/${filename}`)
+            })
+          }
+        })
+      : multer.diskStorage({
+          destination: (req, file, callback) => {
+            const dest = path.resolve(
+              __dirname,
+              '..',
+              '..',
+              'public',
+              'uploads',
+              'users'
+            )
 
-        callback(null, filename)
-      })
-    }
-  }),
+            callback(null, dest)
+          },
+          filename: (req, file, callback) => {
+            crypto.randomBytes(16, (err, hash) => {
+              if (err) {
+                callback(err)
+              }
+
+              const filename = `${hash.toString('hex')}_${file.originalname}`
+
+              file.location = `uploads/users/${filename}`
+
+              callback(null, filename)
+            })
+          }
+        }),
   limits: {
     fileSize: 5 * 1024 * 1024
   },

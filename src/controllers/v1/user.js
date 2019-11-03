@@ -3,6 +3,8 @@ const { User } = require('../../models')
 const fs = require('fs')
 const path = require('path')
 
+const { S3Service } = require('../services')
+
 class UserController {
   /**
    * @swagger
@@ -319,6 +321,13 @@ class UserController {
    */
   async update(req, res) {
     const { id } = req.params
+    const { id: userid, tipo } = req.user
+
+    if (tipo !== 'admin' && id !== userid) {
+      return res.status(403).json({
+        message: "You don't have permission to change this user's information"
+      })
+    }
 
     const user = await User.findOne({ where: { id } })
 
@@ -328,17 +337,25 @@ class UserController {
 
     if (req.file !== undefined) {
       if (user.imagepath !== null && user.imagepath !== '') {
-        const filepath = path.resolve(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          'public',
-          user.imagepath
-        )
-
         try {
-          fs.unlinkSync(filepath)
+          if (process.env.NODE_ENV === 'prod') {
+            const response = S3Service.destroy(`users/${instance.name}`)
+
+            if (response.status === 500) {
+              console.error(response.message)
+            }
+          } else {
+            const filepath = path.resolve(
+              __dirname,
+              '..',
+              '..',
+              '..',
+              'public',
+              user.imagepath
+            )
+
+            fs.unlinkSync(filepath)
+          }
         } catch (err) {
           console.error(err)
         }
@@ -416,6 +433,13 @@ class UserController {
    */
   async delete(req, res) {
     const { id } = req.params
+    const { id: userid, tipo } = req.user
+
+    if (tipo !== 'admin' && id !== userid) {
+      return res.status(403).json({
+        message: "You don't have permission to delete this user"
+      })
+    }
 
     const user = await User.findOne({ where: { id } })
 

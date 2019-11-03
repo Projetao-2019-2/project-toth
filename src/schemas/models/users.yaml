@@ -19,6 +19,16 @@ components:
             - admin
             - undergraduate
             - highschool
+        facebook_link:
+          type: string
+        instagram_link:
+          type: string
+        twitter_link:
+          type: string
+        image:
+          type: string
+        imagepath:
+          type: string
         createdAt:
           type: string
           format: date-time

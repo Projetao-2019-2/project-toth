@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
@@ -13,13 +15,33 @@ module.exports = (sequelize, DataTypes) => {
       curso: DataTypes.TEXT,
       ies: DataTypes.TEXT,
       senha: DataTypes.STRING,
-      password: DataTypes.VIRTUAL
+      password: DataTypes.VIRTUAL,
+      facebook_link: DataTypes.STRING,
+      instagram_link: DataTypes.STRING,
+      twitter_link: DataTypes.STRING,
+      image: DataTypes.STRING,
+      imagepath: DataTypes.STRING
     },
     {
       hooks: {
         beforeSave: async user => {
           if (user.password) {
             user.senha = await bcrypt.hash(user.password, 8)
+          }
+        },
+        afterDestroy: (instance, options) => {
+          const filepath = path.resolve(
+            __dirname,
+            '..',
+            '..',
+            'public',
+            instance.imagepath
+          )
+
+          try {
+            fs.unlinkSync(filepath)
+          } catch (err) {
+            console.error(err)
           }
         }
       },

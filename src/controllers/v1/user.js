@@ -1,5 +1,8 @@
 const { User } = require('../../models')
 
+const fs = require('fs')
+const path = require('path')
+
 class UserController {
   /**
    * @swagger
@@ -175,6 +178,15 @@ class UserController {
    *              password:
    *                type: string
    *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
+   *              file:
+   *                type: string
+   *                format: binary
    *    responses:
    *      201:
    *        description: Successfully creates a user
@@ -200,17 +212,23 @@ class UserController {
    */
   async create(req, res) {
     try {
-      const user = await User.create(req.body)
+      if (req.file !== undefined) {
+        req.body.image = req.file.filename
+        req.body.imagepath = req.file.location
+      }
 
+      req.body.avatar = uploaded
+
+      const user = await User.create(req.body)
       if (!user) {
         return res.status(500).json({ message: 'Unable to create user' })
       }
 
       res.status(201).json({ user: user.returnObject() })
     } catch (err) {
-      return res
-        .status(500)
-        .json({ message: 'An account with the email informed already exists' })
+      return res.status(500).json({
+        message: `An error occurred while trying to create user: ${err}`
+      })
     }
   }
 
@@ -249,6 +267,15 @@ class UserController {
    *              senha:
    *                type: string
    *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
+   *              file:
+   *                type: string
+   *                format: binary
    *    responses:
    *      200:
    *        description: Successfully updates a user
@@ -297,6 +324,28 @@ class UserController {
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (req.file !== undefined) {
+      if (user.imagepath !== null && user.imagepath !== '') {
+        const filepath = path.resolve(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          'public',
+          user.imagepath
+        )
+
+        try {
+          fs.unlinkSync(filepath)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+
+      req.body.image = req.file.filename
+      req.body.imagepath = req.file.location
     }
 
     const updated = await user.update(req.body)

@@ -1,4 +1,13 @@
-const { Comment, Post, User, Question, sequelize } = require('../../models')
+const {
+  Comment,
+  Post,
+  PostFiles,
+  User,
+  Question,
+  sequelize
+} = require('../../models')
+
+const { S3Service } = require('../../services')
 
 class PostController {
   /**
@@ -312,7 +321,8 @@ class PostController {
     const uploaded = files.map(file => {
       const tipo = file.mimetype.split('/')[0]
 
-      file.path = `uploads/posts/${tipo}/${file.filename}`
+      file.name = file.filename
+      file.path = file.location
       file.tipo = tipo
 
       return file
@@ -451,7 +461,8 @@ class PostController {
 
           await post.createFile(
             {
-              path: `uploads/posts/${tipo}/${file.filename}`,
+              name: file.filename,
+              path: file.location,
               tipo
             },
             { transaction }

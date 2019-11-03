@@ -1,10 +1,13 @@
 const fs = require('fs')
 const path = require('path')
 
+const { S3Service } = require('../services')
+
 module.exports = (sequelize, DataTypes) => {
   const PostFiles = sequelize.define(
     'PostFiles',
     {
+      name: DataTypes.STRING,
       path: DataTypes.STRING,
       tipo: DataTypes.STRING,
       postid: DataTypes.INTEGER
@@ -12,16 +15,26 @@ module.exports = (sequelize, DataTypes) => {
     {
       hooks: {
         afterDestroy: (instance, options) => {
-          const filepath = path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'public',
-            instance.path
-          )
-
           try {
-            fs.unlinkSync(filepath)
+            if (process.env.NODE_ENV === 'prod') {
+              const response = S3Service.destroy(
+                `posts/${instance.tipo}/${instance.name}`
+              )
+
+              if (response.status === 500) {
+                console.error(response.message)
+              }
+            } else {
+              const filepath = path.resolve(
+                __dirname,
+                '..',
+                '..',
+                'public',
+                instance.path
+              )
+
+              fs.unlinkSync(filepath)
+            }
           } catch (err) {
             console.error(err)
           }
@@ -29,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   )
-  PostFiles.associate = function (models) {
+  PostFiles.associate = function(models) {
     PostFiles.belongsTo(models.Post)
   }
 

@@ -35,7 +35,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
+  async list(req, res) {
     const users = await User.findAll()
 
     if (!users) {
@@ -83,9 +83,60 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     const { id } = req.params
     const user = await User.findOne({ where: { id } })
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    res.json({ user })
+  }
+
+  /**
+   * @swagger
+   * /users/me:
+   *  get:
+   *    tags:
+   *      - Users
+   *    description: Returns information and posts of logged user
+   *    security:
+   *      - bearerAuth: []
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: Successfully retrieves the user queried
+   *        schema:
+   *          $ref: '#/components/schemas/ExtendedUsersModel'
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                user:
+   *                  type: object
+   *                  $ref: '#/components/schemas/ExtendedUsersModel'
+   *      404:
+   *        description: The server was unable to find the user
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   */
+  async profile(req, res) {
+    const { id } = req.user
+
+    const user = await User.findOne({
+      where: { id },
+      include: [
+        { association: 'posts', include: ['files', 'category', 'question'] }
+      ]
+    })
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
@@ -147,7 +198,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
+  async create(req, res) {
     try {
       const user = await User.create(req.body)
 
@@ -239,7 +290,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     const { id } = req.params
 
     const user = await User.findOne({ where: { id } })
@@ -314,7 +365,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     const { id } = req.params
 
     const user = await User.findOne({ where: { id } })

@@ -34,15 +34,19 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
 
-  User.prototype.checkPassword = function (password) {
+  User.prototype.checkPassword = function(password) {
     return bcrypt.compare(password, this.senha)
   }
 
-  User.prototype.returnObject = function () {
+  User.prototype.returnObject = function() {
     this.password = undefined
     this.senha = undefined
 
     return this
+  }
+
+  User.associate = models => {
+    User.hasMany(models.Post, { as: 'posts' })
   }
 
   return User

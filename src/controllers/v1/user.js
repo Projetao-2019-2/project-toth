@@ -1,5 +1,8 @@
 const { User } = require('../../models')
 
+const fs = require('fs')
+const path = require('path')
+
 class UserController {
   /**
    * @swagger
@@ -35,8 +38,8 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
-    const users = await User.findAll({ include: ['avatar'] })
+  async list(req, res) {
+    const users = await User.findAll()
 
     if (!users) {
       return res.status(500).json({ message: 'Unable to get list of users' })
@@ -83,7 +86,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     const { id } = req.params
     const user = await User.findOne({ where: { id } })
 
@@ -130,6 +133,9 @@ class UserController {
    *                type: string
    *              twitter_link:
    *                type: string
+   *              file:
+   *                type: string
+   *                format: binary
    *    responses:
    *      201:
    *        description: Successfully creates a user
@@ -153,31 +159,25 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
+  async create(req, res) {
     try {
-      const { avatar } = req
+      if (req.file !== undefined) {
+        req.body.image = req.file.filename
+        req.body.imagepath = req.file.location
+      }
 
-      const uploaded = avatar.map(img => {
-        const type = img.mimetype.split('/')[0]
-  
-        img.path = `uploads/users/avatars/${img.filename}`
-        img.type = type
-  
-        return img
-      })
-  
       req.body.avatar = uploaded
 
-      const user = await User.create(req.body, { include: ['avatar'] })
+      const user = await User.create(req.body)
       if (!user) {
         return res.status(500).json({ message: 'Unable to create user' })
       }
 
       res.status(201).json({ user: user.returnObject() })
     } catch (err) {
-      return res
-        .status(500)
-        .json({ message: 'An account with the email informed already exists' })
+      return res.status(500).json({
+        message: `An error occurred while trying to create user: ${err}`
+      })
     }
   }
 
@@ -204,11 +204,6 @@ class UserController {
    *          schema:
    *            type: object
    *            properties:
-   *              avatarids:
-   *                type: array
-   *                description: The ids of the already existing avatars in the post
-   *                items:
-   *                  type: integer
    *              nome:
    *                type: string
    *              email:
@@ -227,6 +222,9 @@ class UserController {
    *                type: string
    *              twitter_link:
    *                type: string
+   *              file:
+   *                type: string
+   *                format: binary
    *    responses:
    *      200:
    *        description: Successfully updates a user
@@ -268,9 +266,8 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     const { id } = req.params
-    const { avatar } = req
 
     const user = await User.findOne({ where: { id } })
 
@@ -278,18 +275,29 @@ class UserController {
       return res.status(404).json({ message: 'User not found' })
     }
 
-    const uploaded = avatar.map(img => {
-      const type = img.mimetype.split('/')[0]
+    if (req.file !== undefined) {
+      if (user.imagepath !== null && user.imagepath !== '') {
+        const filepath = path.resolve(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          'public',
+          user.imagepath
+        )
 
-      img.path = `uploads/users/avatars/${img.filename}`
-      img.type = type
+        try {
+          fs.unlinkSync(filepath)
+        } catch (err) {
+          console.error(err)
+        }
+      }
 
-      return img
-    })
+      req.body.image = req.file.filename
+      req.body.imagepath = req.file.location
+    }
 
-    req.body.avatar = uploaded
-
-    const updated = await user.update(req.body, { include: ['avatar']})
+    const updated = await user.update(req.body)
 
     if (!updated) {
       return res.status(500).json({ message: `Unable to update user ${id}` })
@@ -355,7 +363,7 @@ class UserController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     const { id } = req.params
 
     const user = await User.findOne({ where: { id } })

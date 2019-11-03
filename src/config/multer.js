@@ -73,20 +73,14 @@ const usersConfig = {
   dest: path.resolve(__dirname, '..', '..', 'public', 'uploads', 'users'),
   storage: multer.diskStorage({
     destination: (req, file, callback) => {
-      let dest = ''
-      const type = file.mimetype.split('/')[0]
-
-      dest = path.resolve(
+      const dest = path.resolve(
         __dirname,
         '..',
         '..',
         'public',
         'uploads',
-        'users',
-        'avatars'
+        'users'
       )
-
-      file.type = type
 
       callback(null, dest)
     },
@@ -98,19 +92,17 @@ const usersConfig = {
 
         const filename = `${hash.toString('hex')}_${file.originalname}`
 
+        file.location = `uploads/users/${filename}`
+
         callback(null, filename)
       })
     }
   }),
   limits: {
-    fileSize: 100 * 1024
+    fileSize: 5 * 1024 * 1024
   },
   fileFilter: (req, file, callback) => {
-    const allowedMimes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif'
-    ]
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif']
 
     if (!allowedMimes.includes(file.mimetype)) {
       callback(new Error('Unsupported Media Type'))

@@ -40,6 +40,21 @@ components:
             question:
               type: object
               $ref: '#/components/schemas/BasicQuestionModel'
+    ExtendedPostNoAuthorModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicPostModel'
+        - type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPostFileModel'
+            category:
+              type: object
+              $ref: '#/components/schemas/BasicCategoryModel'
+            question:
+              type: object
+              $ref: '#/components/schemas/BasicQuestionModel'
     ExtendedPostViewModel:
       allOf:
         - $ref: '#/components/schemas/ExtendedPostModel'

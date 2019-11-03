@@ -186,6 +186,31 @@ class UserController {
    *                type: string
    *              twitter_link:
    *                type: string
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              nome:
+   *                type: string
+   *              email:
+   *                type: string
+   *                format: email
+   *              curso:
+   *                type: string
+   *              ies:
+   *                type: string
+   *              type:
+   *                type: string
+   *                enum: ['admin', 'undergraduate', 'highschool']
+   *              password:
+   *                type: string
+   *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
    *              file:
    *                type: string
    *                format: binary
@@ -218,8 +243,6 @@ class UserController {
         req.body.image = req.file.filename
         req.body.imagepath = req.file.location
       }
-
-      req.body.avatar = uploaded
 
       const user = await User.create(req.body)
       if (!user) {
@@ -266,9 +289,37 @@ class UserController {
    *                type: string
    *              ies:
    *                type: string
-   *              senha:
+   *              type:
+   *                type: string
+   *                enum: ['admin', 'undergraduate', 'highschool']
+   *              password:
    *                type: string
    *                format: password
+   *              facebook_link:
+   *                type: string
+   *              instagram_link:
+   *                type: string
+   *              twitter_link:
+   *                type: string
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              nome:
+   *                type: string
+   *              email:
+   *                type: string
+   *                format: email
+   *              curso:
+   *                type: string
+   *              ies:
+   *                type: string
+   *              password:
+   *                type: string
+   *                format: password
+   *              type:
+   *                type: string
+   *                enum: ['admin', 'undergraduate', 'highschool']
    *              facebook_link:
    *                type: string
    *              instagram_link:

@@ -5,6 +5,7 @@ const CategoryController = require(`./${process.env.API_VERSION}/category`)
 const CommentController = require(`./${process.env.API_VERSION}/comment`)
 const UserController = require(`./${process.env.API_VERSION}/user`)
 const SMTPController = require(`./${process.env.API_VERSION}/smtp`)
+const MailController = require(`./${process.env.API_VERSION}/mail`)
 
 module.exports = {
   AuthController,
@@ -13,5 +14,6 @@ module.exports = {
   CategoryController,
   CommentController,
   UserController,
-  SMTPController
+  SMTPController,
+  MailController
 }

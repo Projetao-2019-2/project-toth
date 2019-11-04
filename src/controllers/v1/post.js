@@ -75,6 +75,14 @@ class PostController {
     }
 
     if (search !== undefined) {
+      let query = search.split('-')
+
+      query = query.map(term => {
+        if (term.trim() !== '') {
+          return term.trim().replace(/\s+/g, '<->')
+        }
+      })
+
       const fts = await sequelize.query(
         `SELECT p.* FROM ${Post.tableName} p
         LEFT JOIN ${User.tableName} u ON p.userid = u.id
@@ -82,8 +90,9 @@ class PostController {
         WHERE p._search @@ to_tsquery('Portuguese', :query) OR
         u._search @@ to_tsquery('Portuguese', :query) OR
         q._search @@ to_tsquery('Portuguese', :query);`,
-        { model: Post, replacements: { query: search.replace(/\s+/g, '|') } }
+        { model: Post, replacements: { query: query.join('|') } }
       )
+      //search.replace(/\s+/g, '|')
 
       if (fts.length > 0) {
         where.id = fts.map(item => item.id)

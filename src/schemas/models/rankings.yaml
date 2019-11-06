@@ -1,0 +1,18 @@
+components:
+  schemas:
+    BasicCategoryModel:
+      properties:
+        id:
+          type: integer
+        points:
+          type: integer
+        type:
+          type: string
+        userid:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

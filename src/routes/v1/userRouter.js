@@ -11,6 +11,7 @@ router.get('/me', authorization, UserController.profile)
 
 router.get('/', UserController.list)
 router.get('/:id', UserController.view)
+router.get('/:id/ranking/:type', UserController.ranking)
 router.post('/', multer(usersConfig).single('file'), UserController.create)
 router.put(
   '/:id',

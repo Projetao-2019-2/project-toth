@@ -1,4 +1,8 @@
-const { User } = require('../../models')
+const {
+  User,
+  Ranking,
+  sequelize
+} = require('../../models')
 
 const fs = require('fs')
 const path = require('path')
@@ -148,6 +152,68 @@ class UserController {
     }
 
     res.json({ user })
+  }
+
+  /**
+   * @swagger
+   * /users/{id}/ranking/{type}:
+   *  get:
+   *    tags:
+   *      - Users
+   *    description: Returns specifics rank informations and user positions queried by user id and ranking type
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        schema:
+   *          type: integer
+   *        required: true
+   *      - name: type
+   *        in: path
+   *        schema:
+   *          type: string
+   *        required: true
+   *    responses:
+   *      200:
+   *        description: Successfully retrieves the ranking queried
+   *      404:
+   *        description: The server was unable to find the user
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   *      500:
+   *        description: The sever was unable to retrieve the ranking
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   */
+  async ranking(req, res) {
+    try{
+      const { id, type } = req.params
+      rnk = await sequelize.query(
+        `SELECT * from  FROM
+          (SELECT r.*, row_number() over(ORDER BY r.points DESC) AS pos
+          FROM ${Ranking.tableName} r
+          WHERE r.type = type)
+        WHERE userid = id`
+      )
+      if (rnk.length > 0) {
+        return res.status(200).json({ rnk })
+      } else {
+        return res.status(404).json({ message: 'Unable to locate position' })
+      }
+    }catch (error) {
+      return res.status(500).json({ message: error.message })
+    }
   }
 
   /**

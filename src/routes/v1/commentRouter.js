@@ -4,7 +4,11 @@ const { CommentController } = require('../../controllers/')
 
 const { authorization } = require('../../middlewares')
 
-router.post('/', authorization, CommentController.create)
+router.post(
+  '/',
+  authorization,
+  CommentController.create.bind(CommentController)
+)
 router.get('/', CommentController.list)
 router.get('/:id', CommentController.view)
 router.put('/:id', authorization, CommentController.update)

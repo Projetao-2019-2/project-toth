@@ -8,6 +8,7 @@ const { usersConfig } = require('../../config/multer')
 const { UserController } = require('../../controllers')
 
 router.get('/me', authorization, UserController.profile)
+router.get('/ranking', authorization, UserController.ranking)
 
 router.get('/', UserController.list)
 router.get('/:id', UserController.view)

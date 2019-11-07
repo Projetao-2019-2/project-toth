@@ -1,13 +1,11 @@
 const {
   Comment,
   Post,
-  PostFiles,
   User,
   Question,
+  Ranking,
   sequelize
 } = require('../../models')
-
-const { S3Service } = require('../../services')
 
 class PostController {
   /**
@@ -345,6 +343,8 @@ class PostController {
       return res.status(500).json({ message: 'Unable to create post' })
     }
 
+    await this.increase(req.user)
+
     res.status(201).json({ post })
   }
 
@@ -457,7 +457,7 @@ class PostController {
     const transaction = await sequelize.transaction(async transaction => {
       await Promise.all([
         post.files.map(async file => {
-          if (!fileids.includes(file.id.toString())) {
+          if (fileids === undefined || !fileids.includes(file.id.toString())) {
             await file.destroy({ transaction })
           }
         })
@@ -618,7 +618,7 @@ class PostController {
     const { id } = req.params
     const { increment } = req.body
 
-    const post = await Post.findOne({ where: { id } })
+    const post = await Post.findOne({ where: { id }, include: ['author'] })
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
@@ -626,7 +626,43 @@ class PostController {
 
     await post.increment(increment)
 
+    if (increment === 'n_util') {
+      await this.decrease(post.author)
+    } else {
+      await this.increase(post.author)
+    }
+
     res.json({ post })
+  }
+
+  async increase(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 1
+      })
+    } else {
+      await ranking.increment('points')
+    }
+  }
+
+  async decrease(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 0
+      })
+    } else {
+      if (ranking.points > 0) {
+        await ranking.decrement('points')
+      }
+    }
   }
 }
 

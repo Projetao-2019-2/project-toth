@@ -1,4 +1,4 @@
-const { Comment } = require('../../models')
+const { Comment, Ranking } = require('../../models')
 
 class CommentController {
   /**
@@ -68,6 +68,8 @@ class CommentController {
     if (!comment) {
       return res.status('500').json({ message: "Couldn't create comment." })
     }
+
+    await this.decrease(req.user)
 
     return res.status(201).json({ comment })
   }
@@ -328,6 +330,20 @@ class CommentController {
     }
 
     return res.json({ message: 'Comment deleted!' })
+  }
+
+  async increase(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 1
+      })
+    } else {
+      await ranking.increment('points')
+    }
   }
 }
 module.exports = new CommentController()

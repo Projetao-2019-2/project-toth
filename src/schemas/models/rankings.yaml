@@ -1,0 +1,26 @@
+components:
+  schemas:
+    BasicRankingModel:
+      properties:
+        id:
+          type: integer
+        points:
+          type: integer
+        type:
+          type: string
+        userid:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ExtendedRankingModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicRankingModel'
+        - type: object
+          properties:
+            user:
+              type: object
+              $ref: '#/components/schemas/BasicUsersModel'

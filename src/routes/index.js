@@ -22,7 +22,7 @@ router.use(`/${process.env.API_VERSION}/questions`, questionRouter)
 router.use(`/${process.env.API_VERSION}/categories`, categoryRouter)
 router.use(`/${process.env.API_VERSION}/comments`, commentRouter)
 router.use(`/${process.env.API_VERSION}/users`, userRouter)
-router.use(`/${process.env.API_VERSION}/rankings`, rankingRouter)
+router.use(`/${process.env.API_VERSION}/ranking`, rankingRouter)
 
 router.use(`/${process.env.API_VERSION}/swagger.json`, (req, res) => {
   res.setHeader('Content-Type', 'application/json')

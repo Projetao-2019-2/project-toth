@@ -1,33 +1,40 @@
-const { Ranking } = require('../../models')
+const { Ranking, sequelize } = require('../../models')
 
 class RankingController {
-
   /**
    * @swagger
-   * /rankings:
+   * /ranking:
    *  get:
    *    tags:
-   *      - Categories
-   *    description: Returns a list with all the rankings
+   *      - Ranking
+   *    description: Returns the users ranking
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    responses:
    *      200:
-   *        description: Successfully retrives the list of comments
+   *        description: Successfully retrives the ranking
    *        schema:
-   *          $ref: '#/components/schemas/BasicRankingModel'
+   *          $ref: '#/components/schemas/ExtendedRankingModel'
    *        content:
    *          application/json:
    *            schema:
    *              type: object
    *              properties:
+   *                curso_ies:
+   *                  type: string
+   *                my_position:
+   *                  type: integer
+   *                my_points:
+   *                  type: integer
    *                rankings:
    *                  type: array
    *                  items:
    *                    type: object
-   *                    $ref: '#/components/schemas/BasicRankingModel'
+   *                    $ref: '#/components/schemas/ExtendedRankingModel'
    *      500:
-   *        description: The server was unable to get the list of rankings
+   *        description: The server was unable to get the ranking
    *        content:
    *          application/json:
    *            schema:
@@ -36,81 +43,30 @@ class RankingController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
+  async list(req, res) {
+    const { id, curso, ies } = req.user
+
     try {
-      const rankings = await Ranking.findAll()
-      return res.status(200).json({ rankings })
+      const rankings = await Ranking.findAll({
+        where: { type: `${curso} - ${ies}` },
+        order: [['points', 'DESC']],
+        include: ['user']
+      })
+
+      const myEntry = rankings.find(item => item.userid === id)
+
+      return res.status(200).json({
+        curso_ies: `${curso} - ${ies}`,
+        my_position: rankings.findIndex(item => item.userid === id) + 1,
+        my_points: myEntry.points,
+        rankings
+      })
     } catch (error) {
       return res.status(500).json({ message: error.message })
     }
   }
 
-  /**
-   * @swagger
-   * /rankings:
-   *  post:
-   *    tags:
-   *      - Categories
-   *    description: Creates a ranking instance
-   *    security:
-   *      - bearerAuth: []
-   *    produces:
-   *      - application/json
-   *    requestBody:
-   *      content:
-   *        application/json:
-   *          schema:
-   *            type: object
-   *            properties:
-   *              name:
-   *                type: string
-   *              description:
-   *                type: string
-   *              color:
-   *                type: string
-   *    responses:
-   *      201:
-   *        description: Successfully creates a ranking
-   *        schema:
-   *          $ref: '#/components/schemas/BasicRankingModel'
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                ranking:
-   *                  type: object
-   *                  $ref: '#/components/schemas/BasicRankingModel'
-   *      401:
-   *        description: Authorization information is missing or invalid.
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      403:
-   *        description: You don't have the required permissions to do this request
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      500:
-   *        description: The sever was unable to create the ranking
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   */
-
-  async view (req, res) {
+  async view(req, res) {
     try {
       const { id } = req.params
       const Ranking = await Ranking.findOne({
@@ -125,72 +81,7 @@ class RankingController {
     }
   }
 
-  /**
-   * @swagger
-   * /rankings:
-   *  post:
-   *    tags:
-   *      - Categories
-   *    description: Creates a ranking instance
-   *    security:
-   *      - bearerAuth: []
-   *    produces:
-   *      - application/json
-   *    requestBody:
-   *      content:
-   *        application/json:
-   *          schema:
-   *            type: object
-   *            properties:
-   *              name:
-   *                type: string
-   *              description:
-   *                type: string
-   *              color:
-   *                type: string
-   *    responses:
-   *      201:
-   *        description: Successfully creates a ranking
-   *        schema:
-   *          $ref: '#/components/schemas/BasicRankingModel'
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                ranking:
-   *                  type: object
-   *                  $ref: '#/components/schemas/BasicRankingModel'
-   *      401:
-   *        description: Authorization information is missing or invalid.
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      403:
-   *        description: You don't have the required permissions to do this request
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      500:
-   *        description: The sever was unable to create the ranking
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   */
-
-  async create (req, res) {
+  async create(req, res) {
     try {
       const Ranking = await Ranking.create(req.body)
       return res.status(201).json({
@@ -201,78 +92,7 @@ class RankingController {
     }
   }
 
-  /**
-   * @swagger
-   * /rankings/{id}:
-   *  put:
-   *    tags:
-   *      - Categories
-   *    description: Updates a ranking instance
-   *    security:
-   *      - bearerAuth: []
-   *    produces:
-   *      - application/json
-   *    parameters:
-   *      - name: id
-   *        in: path
-   *        schema:
-   *          type: integer
-   *        required: true
-   *    requestBody:
-   *      content:
-   *        application/json:
-   *          schema:
-   *            type: object
-   *            properties:
-   *              name:
-   *                type: string
-   *              description:
-   *                type: string
-   *              color:
-   *                type: string
-   *    responses:
-   *      200:
-   *        description: Successfully updates a ranking
-   *        schema:
-   *          $ref: '#/components/schemas/BasicRankingModel'
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                ranking:
-   *                  type: object
-   *                  $ref: '#/components/schemas/BasicRankingModel'
-   *      401:
-   *        description: Authorization information is missing or invalid.
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      403:
-   *        description: You don't have the required permissions to do this request
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      500:
-   *        description: The sever was unable to update the ranking
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   */
-
-  async update (req, res) {
+  async update(req, res) {
     try {
       const { id } = req.params
       const [updated] = await Ranking.update(req.body, {
@@ -288,63 +108,7 @@ class RankingController {
     }
   }
 
-  /**
-   * @swagger
-   * /rankings/{id}:
-   *  delete:
-   *    tags:
-   *      - Rankings
-   *    description: Deletes a ranking instance
-   *    security:
-   *      - bearerAuth: []
-   *    produces:
-   *      - application/json
-   *    parameters:
-   *      - name: id
-   *        in: path
-   *        schema:
-   *          type: integer
-   *        required: true
-   *    responses:
-   *      200:
-   *        description: Successfully deletes the ranking
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      401:
-   *        description: Authorization information is missing or invalid.
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      403:
-   *        description: You don't have the required permissions to do this request
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   *      500:
-   *        description: The sever was unable to delete the ranking
-   *        content:
-   *          application/json:
-   *            schema:
-   *              type: object
-   *              properties:
-   *                message:
-   *                  type: string
-   */
-
-  async delete (req, res) {
+  async delete(req, res) {
     try {
       const { id } = req.params
       const deleted = await Ranking.destroy({

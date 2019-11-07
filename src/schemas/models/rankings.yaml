@@ -1,6 +1,6 @@
 components:
   schemas:
-    BasicCategoryModel:
+    BasicRankingModel:
       properties:
         id:
           type: integer
@@ -16,3 +16,11 @@ components:
         updatedAt:
           type: string
           format: date-time
+    ExtendedRankingModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicRankingModel'
+        - type: object
+          properties:
+            user:
+              type: object
+              $ref: '#/components/schemas/BasicUsersModel'

@@ -1,8 +1,6 @@
-'use strict';
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    queryInterface.addColumn('rankings', 'userid', {
+    return queryInterface.addColumn('rankings', 'userid', {
       type: Sequelize.INTEGER,
       references: {
         model: 'users',
@@ -18,4 +16,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.removeColumn('rankings', 'userid')
   }
-};
+}

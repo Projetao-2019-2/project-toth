@@ -1,8 +1,4 @@
-const {
-  User,
-  Ranking,
-  sequelize
-} = require('../../models')
+const { User, Ranking, sequelize } = require('../../models')
 
 const fs = require('fs')
 const path = require('path')
@@ -156,27 +152,27 @@ class UserController {
 
   /**
    * @swagger
-   * /users/{id}/ranking/{type}:
+   * /users/ranking:
    *  get:
    *    tags:
    *      - Users
-   *    description: Returns specifics rank informations and user positions queried by user id and ranking type
+   *    description: Returns specifics rank informations and user positions for logged user
    *    produces:
    *      - application/json
-   *    parameters:
-   *      - name: id
-   *        in: path
-   *        schema:
-   *          type: integer
-   *        required: true
-   *      - name: type
-   *        in: path
-   *        schema:
-   *          type: string
-   *        required: true
+   *    security:
+   *      - bearerAuth: []
    *    responses:
    *      200:
    *        description: Successfully retrieves the ranking queried
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                points:
+   *                  type: integer
+   *                position:
+   *                  type: string
    *      404:
    *        description: The server was unable to find the user
    *        content:
@@ -197,21 +193,23 @@ class UserController {
    *                  type: string
    */
   async ranking(req, res) {
-    try{
-      const { id, type } = req.params
-      rnk = await sequelize.query(
-        `SELECT * from  FROM
+    try {
+      const { id, curso, ies } = req.user
+      const rnk = await sequelize.query(
+        `SELECT * FROM
           (SELECT r.*, row_number() over(ORDER BY r.points DESC) AS pos
           FROM ${Ranking.tableName} r
-          WHERE r.type = type)
-        WHERE userid = id`
+          WHERE r.type = :type) sub
+        WHERE userid = :id`,
+        { replacements: { id: id, type: `${curso} - ${ies}` } }
       )
-      if (rnk.length > 0) {
-        return res.status(200).json({ rnk })
-      } else {
+
+      if (!rnk) {
         return res.status(404).json({ message: 'Unable to locate position' })
       }
-    }catch (error) {
+
+      return res.json({ points: rnk[0][0].points, position: rnk[0][0].pos })
+    } catch (error) {
       return res.status(500).json({ message: error.message })
     }
   }

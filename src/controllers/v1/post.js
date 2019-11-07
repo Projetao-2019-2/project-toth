@@ -90,9 +90,8 @@ class PostController {
         WHERE p._search @@ to_tsquery('Portuguese', :query) OR
         u._search @@ to_tsquery('Portuguese', :query) OR
         q._search @@ to_tsquery('Portuguese', :query);`,
-        { model: Post, replacements: { query: query.join('|') } }
+        { model: Post, replacements: { query: query.join('&') } }
       )
-      //search.replace(/\s+/g, '|')
 
       if (fts.length > 0) {
         where.id = fts.map(item => item.id)

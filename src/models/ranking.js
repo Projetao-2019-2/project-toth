@@ -6,7 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       userid: DataTypes.INTEGER
     },
-    {}
+    {
+      timestamps: false
+    }
   )
   Ranking.associate = function(models) {
     Ranking.belongsTo(models.User, { as: 'user', foreignKey: 'userid' })

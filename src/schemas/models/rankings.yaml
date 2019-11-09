@@ -10,12 +10,6 @@ components:
           type: string
         userid:
           type: integer
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     ExtendedRankingModel:
       allOf:
         - $ref: '#/components/schemas/BasicRankingModel'

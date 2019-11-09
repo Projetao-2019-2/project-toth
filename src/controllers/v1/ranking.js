@@ -55,10 +55,15 @@ class RankingController {
 
       const myEntry = rankings.find(item => item.userid === id)
 
+      const myPoints = myEntry !== undefined ? myEntry.points : 0
+
       return res.status(200).json({
         curso_ies: `${curso} - ${ies}`,
-        my_position: rankings.findIndex(item => item.userid === id) + 1,
-        my_points: myEntry.points,
+        my_position:
+          myEntry !== undefined
+            ? rankings.findIndex(item => item.userid === id) + 1
+            : 0,
+        my_points: myPoints,
         rankings
       })
     } catch (error) {

@@ -438,7 +438,7 @@ class UserController {
     const { id } = req.params
     const { id: userid, tipo } = req.user
 
-    if (tipo !== 'admin' && id !== userid) {
+    if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
         message: "You don't have permission to change this user's information"
       })
@@ -550,7 +550,7 @@ class UserController {
     const { id } = req.params
     const { id: userid, tipo } = req.user
 
-    if (tipo !== 'admin' && id !== userid) {
+    if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
         message: "You don't have permission to delete this user"
       })

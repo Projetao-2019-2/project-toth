@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('admin', 'undergraduate', 'highschool'),
       curso: DataTypes.TEXT,
       ies: DataTypes.TEXT,
+      school: DataTypes.TEXT,
       senha: DataTypes.STRING,
       password: DataTypes.VIRTUAL,
       facebook_link: DataTypes.STRING,

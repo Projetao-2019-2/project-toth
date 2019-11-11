@@ -238,6 +238,8 @@ class UserController {
    *                type: string
    *              ies:
    *                type: string
+   *              school:
+   *                type: string
    *              type:
    *                type: string
    *                enum: ['admin', 'undergraduate', 'highschool']
@@ -262,6 +264,8 @@ class UserController {
    *              curso:
    *                type: string
    *              ies:
+   *                type: string
+   *              school:
    *                type: string
    *              type:
    *                type: string
@@ -353,6 +357,8 @@ class UserController {
    *                type: string
    *              ies:
    *                type: string
+   *              school:
+   *                type: string
    *              type:
    *                type: string
    *                enum: ['admin', 'undergraduate', 'highschool']
@@ -377,6 +383,8 @@ class UserController {
    *              curso:
    *                type: string
    *              ies:
+   *                type: string
+   *              school:
    *                type: string
    *              password:
    *                type: string

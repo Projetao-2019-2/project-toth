@@ -69,7 +69,7 @@ class CommentController {
       return res.status('500').json({ message: "Couldn't create comment." })
     }
 
-    await this.decrease(req.user)
+    await this.increase(req.user)
 
     return res.status(201).json({ comment })
   }
@@ -160,7 +160,7 @@ class CommentController {
     const { id } = req.params
     const comment = await Comment.findOne({
       where: { id },
-      include: ['post', 'author', 'parent', 'children']
+      include: ['post', 'author', 'parent', 'children'],
     })
 
     if (!comment) {
@@ -339,7 +339,7 @@ class CommentController {
       await Ranking.create({
         userid: user.id,
         type: `${user.curso} - ${user.ies}`,
-        points: 1
+        points: 1,
       })
     } else {
       await ranking.increment('points')

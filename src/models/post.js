@@ -3,8 +3,6 @@ module.exports = (sequelize, DataTypes) => {
     'Post',
     {
       texto: DataTypes.TEXT,
-      util: DataTypes.INTEGER,
-      n_util: DataTypes.INTEGER,
       userid: DataTypes.INTEGER,
       categoryid: DataTypes.INTEGER,
       questionid: DataTypes.INTEGER
@@ -17,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'cascade',
       hooks: true
     })
+    Post.hasMany(models.PostEvaluation, { as: 'likes' })
     Post.hasMany(models.Comment, { as: 'comments' })
     Post.belongsTo(models.User, { as: 'author', foreignKey: 'userid' })
     Post.belongsTo(models.Category, {

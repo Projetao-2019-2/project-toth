@@ -21,7 +21,11 @@ router.put(
   multer(postsConfig).array('file'),
   PostController.update
 )
-router.patch('/:id', PostController.evaluate.bind(PostController))
+router.patch(
+  '/:id',
+  authorization,
+  PostController.evaluate.bind(PostController)
+)
 router.delete('/:id', authorization, PostController.delete)
 
 module.exports = router

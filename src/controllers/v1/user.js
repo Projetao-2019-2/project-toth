@@ -1,4 +1,4 @@
-const { User, Ranking, sequelize } = require('../../models')
+const { User, Ranking, PostEvaluation, sequelize } = require('../../models')
 
 const fs = require('fs')
 const path = require('path')
@@ -139,8 +139,27 @@ class UserController {
     const user = await User.findOne({
       where: { id },
       include: [
-        { association: 'posts', include: ['files', 'category', 'question'] }
-      ]
+        {
+          association: 'posts',
+          attributes: {
+            include: [
+              [
+                sequelize.literal(
+                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = true)`,
+                ),
+                'util',
+              ],
+              [
+                sequelize.literal(
+                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = false)`,
+                ),
+                'n_util',
+              ],
+            ],
+          },
+          include: ['files', 'category', 'question'],
+        },
+      ],
     })
 
     if (!user) {
@@ -201,7 +220,7 @@ class UserController {
           FROM ${Ranking.tableName} r
           WHERE r.type = :type) sub
         WHERE userid = :id`,
-        { replacements: { id: id, type: `${curso} - ${ies}` } }
+        { replacements: { id: id, type: `${curso} - ${ies}` } },
       )
 
       if (!rnk) {
@@ -320,7 +339,7 @@ class UserController {
       res.status(201).json({ user: user.returnObject() })
     } catch (err) {
       return res.status(500).json({
-        message: `An error occurred while trying to create user: ${err}`
+        message: `An error occurred while trying to create user: ${err}`,
       })
     }
   }
@@ -448,7 +467,7 @@ class UserController {
 
     if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
-        message: "You don't have permission to change this user's information"
+        message: "You don't have permission to change this user's information",
       })
     }
 
@@ -468,14 +487,7 @@ class UserController {
               console.error(response.message)
             }
           } else {
-            const filepath = path.resolve(
-              __dirname,
-              '..',
-              '..',
-              '..',
-              'public',
-              user.imagepath
-            )
+            const filepath = path.resolve(__dirname, '..', '..', '..', 'public', user.imagepath)
 
             fs.unlinkSync(filepath)
           }
@@ -560,7 +572,7 @@ class UserController {
 
     if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
-        message: "You don't have permission to delete this user"
+        message: "You don't have permission to delete this user",
       })
     }
 

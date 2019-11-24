@@ -1,7 +1,7 @@
 const { Notification } = require('../../models')
 
 class NotificationController {
-   /**
+  /**
    * @swagger
    * /notifications:
    *  get:
@@ -35,11 +35,13 @@ class NotificationController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
+  async list(req, res) {
     const notifications = await Notification.findAll()
 
     if (!notifications) {
-      return res.status(500).json({ message: 'Unable to get list of notifications' })
+      return res
+        .status(500)
+        .json({ message: 'Unable to get list of notifications' })
     }
 
     res.json({ notifications })
@@ -83,7 +85,7 @@ class NotificationController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     const { id } = req.params
     const notification = await Notification.findOne({ where: { id } })
 
@@ -119,7 +121,7 @@ class NotificationController {
    *      201:
    *        description: Successfully creates a notification
    *        schema:
-   *          $ref: '#/components/schemas/BasicNotificationModel'
+   *          $ref: '#/components/schemas/BasicNotificationsModel'
    *        content:
    *          application/json:
    *            schema:
@@ -127,7 +129,7 @@ class NotificationController {
    *              properties:
    *                notification:
    *                  type: object
-   *                  $ref: '#/components/schemas/BasicNotificationModel'
+   *                  $ref: '#/components/schemas/BasicNotificationsModel'
    *      401:
    *        description: Authorization information is missing or invalid.
    *        content:
@@ -156,12 +158,14 @@ class NotificationController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
+  async create(req, res) {
     try {
       const notification = await Notification.create(req.body)
 
       if (!notification) {
-        return res.status(500).json({ message: 'Unable to create notification' })
+        return res
+          .status(500)
+          .json({ message: 'Unable to create notification' })
       }
 
       res.status(201).json({ notification: notification.returnObject() })
@@ -203,7 +207,7 @@ class NotificationController {
    *      200:
    *        description: Successfully updates a notification
    *        schema:
-   *          $ref: '#/components/schemas/BasicNotificationModel'
+   *          $ref: '#/components/schemas/BasicNotificationsModel'
    *        content:
    *          application/json:
    *            schema:
@@ -211,7 +215,7 @@ class NotificationController {
    *              properties:
    *                notification:
    *                  type: object
-   *                  $ref: '#/components/schemas/BasicNotificationModel'
+   *                  $ref: '#/components/schemas/BasicNotificationsModel'
    *      401:
    *        description: Authorization information is missing or invalid.
    *        content:
@@ -240,7 +244,7 @@ class NotificationController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     const { id } = req.params
 
     const notification = await Notification.findOne({ where: { id } })
@@ -252,7 +256,9 @@ class NotificationController {
     const updated = await notification.update(req.body)
 
     if (!updated) {
-      return res.status(500).json({ message: `Unable to update notification ${id}` })
+      return res
+        .status(500)
+        .json({ message: `Unable to update notification ${id}` })
     }
 
     const p = await Notification.findOne({ where: { id } })
@@ -315,7 +321,7 @@ class NotificationController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     const { id } = req.params
 
     const notification = await Notification.findOne({ where: { id } })
@@ -327,7 +333,9 @@ class NotificationController {
     const deleted = await notification.destroy()
 
     if (!deleted) {
-      return res.status(500).json({ message: 'Unable to delete the notification' })
+      return res
+        .status(500)
+        .json({ message: 'Unable to delete the notification' })
     }
 
     res.json({ message: 'Notification deleted successfully!' })

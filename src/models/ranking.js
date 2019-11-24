@@ -4,11 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       points: DataTypes.INTEGER,
       type: DataTypes.STRING,
-      userid: DataTypes.INTEGER
+      userid: DataTypes.INTEGER,
     },
-    {
-      timestamps: false
-    }
+    {},
   )
   Ranking.associate = function(models) {
     Ranking.belongsTo(models.User, { as: 'user', foreignKey: 'userid' })

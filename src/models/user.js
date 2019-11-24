@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('admin', 'undergraduate', 'highschool'),
       curso: DataTypes.TEXT,
       ies: DataTypes.TEXT,
+      school: DataTypes.TEXT,
       senha: DataTypes.STRING,
       password: DataTypes.VIRTUAL,
       facebook_link: DataTypes.STRING,
@@ -65,8 +66,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   )
-  
-  User.prototype.checkPassword = function (password) {
+
+  User.prototype.checkPassword = function(password) {
     return bcrypt.compare(password, this.senha)
   }
 
@@ -78,7 +79,6 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.associate = models => {
-    User.hasMany(models.Notification, { as: 'notifications' })  
     User.hasMany(models.Post, { as: 'posts', foreignKey: 'userid' })
     User.hasOne(models.Ranking, { as: 'ranking', foreignKey: 'userid' })
   }

@@ -5,6 +5,7 @@ const {
   Question,
   Ranking,
   PostEvaluation,
+  Notification,
   sequelize
 } = require('../../models')
 
@@ -609,6 +610,8 @@ class PostController {
    *    tags:
    *      - Posts
    *    description: Evaluates a post instance in useful or not
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    parameters:
@@ -653,13 +656,15 @@ class PostController {
    */
   async evaluate(req, res) {
     const { id } = req.params
-    const { id: userid } = req.user
+    const { id: userid, nome } = req.user
     const { increment } = req.body
 
     let evalue = true
+    let action = 'considerou sua postagem útil.'
 
     if (increment === 'n_util') {
       evalue = false
+      action = 'não considerou sua postagem útil.'
     }
 
     const post = await Post.findOne({ where: { id }, include: ['author'] })
@@ -698,6 +703,14 @@ class PostController {
       await this.decrease(post.author)
     } else {
       await this.increase(post.author)
+    }
+
+    if (userid !== post.userid) {
+      await Notification.create({
+        texto: `${nome} ${action}`,
+        link: `posts/${id}`,
+        userid: post.userid
+      })
     }
 
     res.json({ increment: 1 })

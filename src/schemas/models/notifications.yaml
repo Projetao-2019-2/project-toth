@@ -1,0 +1,20 @@
+components:
+  schemas:
+    BasicNotificationsModel:
+      properties:
+        id:
+          type: integer
+        texto:
+          type: string
+        link:
+          type: string
+        visualizado:
+          type: boolean
+        userid:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

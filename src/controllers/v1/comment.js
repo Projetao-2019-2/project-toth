@@ -1,4 +1,4 @@
-const { Comment } = require('../../models')
+const { Comment, Ranking } = require('../../models')
 
 class CommentController {
   /**
@@ -18,8 +18,12 @@ class CommentController {
    *          schema:
    *            type: object
    *            properties:
-   *              author:
-   *                type: string
+   *              userid:
+   *                type: integer
+   *              postid:
+   *                type: integer
+   *              parentid:
+   *                type: integer
    *              text:
    *                type: string
    *    responses:
@@ -54,16 +58,18 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async create (req, res) {
-    const comment = await Comment.create({
-      author: req.body.author,
-      text: req.body.text,
-      score: 0
-    })
+  async create(req, res) {
+    const { id: userid } = req.user
+
+    req.body.userid = userid
+
+    const comment = await Comment.create(req.body)
 
     if (!comment) {
       return res.status('500').json({ message: "Couldn't create comment." })
     }
+
+    await this.decrease(req.user)
 
     return res.status(201).json({ comment })
   }
@@ -81,7 +87,7 @@ class CommentController {
    *      200:
    *        description: Successfully retrives the list of comments
    *        schema:
-   *          $ref: '#/components/schemas/BasicCommentModel'
+   *          $ref: '#/components/schemas/ExtendedCommentModel'
    *        content:
    *          application/json:
    *            schema:
@@ -91,7 +97,7 @@ class CommentController {
    *                  type: array
    *                  items:
    *                    type: object
-   *                    $ref: '#/components/schemas/BasicCommentModel'
+   *                    $ref: '#/components/schemas/ExtendedCommentModel'
    *      500:
    *        description: The server was unable to get the list of comments
    *        content:
@@ -102,7 +108,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async list (req, res) {
+  async list(req, res) {
     const comments = await Comment.findAll()
 
     if (!comments) {
@@ -131,7 +137,7 @@ class CommentController {
    *      200:
    *        description: Successfully retrieves the comment queried
    *        schema:
-   *          $ref: '#/components/schemas/BasicCommentModel'
+   *          $ref: '#/components/schemas/ExtendedCommentModel'
    *        content:
    *          application/json:
    *            schema:
@@ -139,7 +145,7 @@ class CommentController {
    *              properties:
    *                comment:
    *                  type: object
-   *                  $ref: '#/components/schemas/BasicCommentModel'
+   *                  $ref: '#/components/schemas/ExtendedCommentModel'
    *      404:
    *        description: The server was unable to find the comment
    *        content:
@@ -150,9 +156,12 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async view (req, res) {
+  async view(req, res) {
     const { id } = req.params
-    const comment = await Comment.findOne({ where: { id } })
+    const comment = await Comment.findOne({
+      where: { id },
+      include: ['post', 'author', 'parent', 'children']
+    })
 
     if (!comment) {
       return res.status('404').json({ message: 'Comment not found.' })
@@ -236,7 +245,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async update (req, res) {
+  async update(req, res) {
     const { id } = req.params
     const { text } = req.body
 
@@ -312,7 +321,7 @@ class CommentController {
    *                message:
    *                  type: string
    */
-  async delete (req, res) {
+  async delete(req, res) {
     const { id } = req.params
     const deleted = await Comment.destroy({ where: { id: id } })
 
@@ -321,6 +330,20 @@ class CommentController {
     }
 
     return res.json({ message: 'Comment deleted!' })
+  }
+
+  async increase(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 1
+      })
+    } else {
+      await ranking.increment('points')
+    }
   }
 }
 module.exports = new CommentController()

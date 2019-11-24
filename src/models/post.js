@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'cascade',
       hooks: true
     })
+    Post.hasMany(models.Comment, { as: 'comments' })
     Post.belongsTo(models.User, { as: 'author', foreignKey: 'userid' })
     Post.belongsTo(models.Category, {
       as: 'category',

@@ -19,9 +19,27 @@ components:
             - admin
             - undergraduate
             - highschool
+        facebook_link:
+          type: string
+        instagram_link:
+          type: string
+        twitter_link:
+          type: string
+        image:
+          type: string
+        imagepath:
+          type: string
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+    ExtendedUsersModel:
+      allOf:
+        - $ref: '#/components/schemas/BasicUsersModel'
+        - type: object
+          properties:
+            posts:
+              type: object
+              $ref: '#/components/schemas/ExtendedPostNoAuthorModel'

@@ -10,7 +10,6 @@ const questionRouter = require(`./${process.env.API_VERSION}/questionRouter`)
 const categoryRouter = require(`./${process.env.API_VERSION}/categoryRouter`)
 const commentRouter = require(`./${process.env.API_VERSION}/commentRouter`)
 const userRouter = require(`./${process.env.API_VERSION}/userRouter`)
-const notificationRouter = require(`./${process.env.API_VERSION}/notificationRouter`)
 const rankingRouter = require(`./${process.env.API_VERSION}/rankingRouter`)
 
 router.get('/', (req, res, next) => {
@@ -23,7 +22,6 @@ router.use(`/${process.env.API_VERSION}/questions`, questionRouter)
 router.use(`/${process.env.API_VERSION}/categories`, categoryRouter)
 router.use(`/${process.env.API_VERSION}/comments`, commentRouter)
 router.use(`/${process.env.API_VERSION}/users`, userRouter)
-router.use(`/${process.env.API_VERSION}/notifications`, notificationRouter)
 router.use(`/${process.env.API_VERSION}/ranking`, rankingRouter)
 
 router.use(`/${process.env.API_VERSION}/swagger.json`, (req, res) => {

@@ -4,6 +4,7 @@ const {
   User,
   Question,
   Ranking,
+  PostEvaluation,
   sequelize
 } = require('../../models')
 
@@ -100,10 +101,30 @@ class PostController {
 
     if (query) {
       posts = await Post.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = post.id AND evaluation = true)`
+              ),
+              'util'
+            ],
+            [
+              sequelize.literal(
+                `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = post.id AND evaluation = false)`
+              ),
+              'n_util'
+            ]
+          ]
+        },
         limit,
         offset,
         where,
-        order: [['util', 'DESC'], ['n_util', 'ASC'], ['id', 'DESC']],
+        order: [
+          [sequelize.col('util'), 'DESC'],
+          [sequelize.col('n_util'), 'DESC'],
+          ['id', 'DESC']
+        ],
         include: ['files', 'author', 'category', 'question']
       })
     }
@@ -156,6 +177,22 @@ class PostController {
   async view(req, res) {
     const { id } = req.params
     const post = await Post.findOne({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = post.id AND evaluation = true)`
+            ),
+            'util'
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = post.id AND evaluation = false)`
+            ),
+            'n_util'
+          ]
+        ]
+      },
       where: { id },
       include: ['files', 'author', 'category', 'question', 'comments']
     })
@@ -616,7 +653,14 @@ class PostController {
    */
   async evaluate(req, res) {
     const { id } = req.params
+    const { id: userid } = req.user
     const { increment } = req.body
+
+    let evalue = true
+
+    if (increment === 'n_util') {
+      evalue = false
+    }
 
     const post = await Post.findOne({ where: { id }, include: ['author'] })
 
@@ -624,15 +668,39 @@ class PostController {
       return res.status(404).json({ message: 'Post not found' })
     }
 
-    await post.increment(increment)
+    const postEval = await PostEvaluation.findOne({
+      where: { postid: id, userid }
+    })
 
-    if (increment === 'n_util') {
+    if (postEval) {
+      if (postEval.evaluation === evalue) {
+        await postEval.destroy()
+
+        return res.json({ increment: -1 })
+      }
+
+      return res.status(400).json({
+        message: 'The user already evaluated the post with another type'
+      })
+    }
+
+    const evaluation = await PostEvaluation.create({
+      postid: id,
+      userid: userid,
+      evaluation: evalue
+    })
+
+    if (!evaluation) {
+      return res.status(500).json({ message: 'Unable to evaluate post' })
+    }
+
+    if (!evalue) {
       await this.decrease(post.author)
     } else {
       await this.increase(post.author)
     }
 
-    res.json({ post })
+    res.json({ increment: 1 })
   }
 
   async increase(user) {

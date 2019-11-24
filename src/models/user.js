@@ -65,8 +65,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   )
-
-  User.prototype.checkPassword = function(password) {
+  
+  User.prototype.checkPassword = function (password) {
     return bcrypt.compare(password, this.senha)
   }
 
@@ -78,6 +78,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.associate = models => {
+    User.hasMany(models.Notification, { as: 'notifications' })  
     User.hasMany(models.Post, { as: 'posts', foreignKey: 'userid' })
     User.hasOne(models.Ranking, { as: 'ranking', foreignKey: 'userid' })
   }

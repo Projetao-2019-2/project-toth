@@ -1,4 +1,11 @@
-const { Post, sequelize } = require('../../models')
+const {
+  Comment,
+  Post,
+  User,
+  Question,
+  Ranking,
+  sequelize
+} = require('../../models')
 
 class PostController {
   /**
@@ -10,6 +17,22 @@ class PostController {
    *    description: Returns a list with all posts
    *    produces:
    *      - application/json
+   *    parameters:
+   *      - name: search
+   *        in: query
+   *        schema:
+   *          type: string
+   *        description: Text (course/ies) searched by the user
+   *      - name: tema
+   *        in: query
+   *        schema:
+   *          type: string
+   *        description: Themes (categories) ids separated by comma (,) for filtering post results
+   *      - name: pag
+   *        in: query
+   *        schema:
+   *          type: string
+   *        description: Page number for pagination
    *    responses:
    *      200:
    *        description: Successfully retrives the list of posts
@@ -36,9 +59,54 @@ class PostController {
    *                  type: string
    */
   async list(req, res) {
-    const posts = await Post.findAll({
-      include: ['files', 'author', 'category', 'question']
-    })
+    const { search, tema, pag = 1 } = req.query
+    const pageSize = 30
+    const offset = (pag - 1) * pageSize
+    const limit = offset + pageSize
+
+    let query = true
+    let where = {}
+    let posts = []
+
+    if (tema) {
+      where.categoryid = tema.split(',')
+    }
+
+    if (search !== undefined) {
+      let query = search.split('-')
+
+      query = query.map(term => {
+        if (term.trim() !== '') {
+          return term.trim().replace(/\s+/g, '<->')
+        }
+      })
+
+      const fts = await sequelize.query(
+        `SELECT p.* FROM ${Post.tableName} p
+        LEFT JOIN ${User.tableName} u ON p.userid = u.id
+        LEFT JOIN ${Question.tableName} q ON p.questionid = q.id
+        WHERE p._search @@ to_tsquery('Portuguese', :query) OR
+        u._search @@ to_tsquery('Portuguese', :query) OR
+        q._search @@ to_tsquery('Portuguese', :query);`,
+        { model: Post, replacements: { query: query.join('&') } }
+      )
+
+      if (fts.length > 0) {
+        where.id = fts.map(item => item.id)
+      } else {
+        query = false
+      }
+    }
+
+    if (query) {
+      posts = await Post.findAll({
+        limit,
+        offset,
+        where,
+        order: [['util', 'DESC'], ['n_util', 'ASC'], ['id', 'DESC']],
+        include: ['files', 'author', 'category', 'question']
+      })
+    }
 
     if (!posts) {
       return res.status(500).json({ message: 'Unable to get list of posts' })
@@ -66,7 +134,7 @@ class PostController {
    *      200:
    *        description: Successfully retrieves the post queried
    *        schema:
-   *          $ref: '#/components/schemas/ExtendedPostModel'
+   *          $ref: '#/components/schemas/ExtendedPostViewModel'
    *        content:
    *          application/json:
    *            schema:
@@ -74,7 +142,7 @@ class PostController {
    *              properties:
    *                post:
    *                  type: object
-   *                  $ref: '#/components/schemas/ExtendedPostModel'
+   *                  $ref: '#/components/schemas/ExtendedPostViewModel'
    *      404:
    *        description: The server was unable to find the post
    *        content:
@@ -89,7 +157,7 @@ class PostController {
     const { id } = req.params
     const post = await Post.findOne({
       where: { id },
-      include: ['files', 'author', 'category', 'question']
+      include: ['files', 'author', 'category', 'question', 'comments']
     })
 
     if (!post) {
@@ -97,6 +165,70 @@ class PostController {
     }
 
     res.json({ post })
+  }
+
+  /**
+   * @swagger
+   * /posts/{id}/comments:
+   *  get:
+   *    tags:
+   *      - Posts
+   *    description: Returns the comments of a specific post queried by id
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: id
+   *        in: path
+   *        schema:
+   *          type: integer
+   *        required: true
+   *      - name: pag
+   *        in: query
+   *        schema:
+   *          type: string
+   *        description: Page number for pagination
+   *    responses:
+   *      200:
+   *        description: Successfully the comments of retrieves the post queried
+   *        schema:
+   *          $ref: '#/components/schemas/BasicCommentModel'
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                comment:
+   *                  type: object
+   *                  $ref: '#/components/schemas/BasicCommentModel'
+   *      404:
+   *        description: The server was unable to find the post
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   */
+  async comments(req, res) {
+    const { id } = req.params
+    const { pag = 1 } = req.query
+    const pageSize = 30
+    const offset = (pag - 1) * pageSize
+    const limit = offset + pageSize
+
+    const comments = await Comment.findAll({
+      offset,
+      limit,
+      where: { postid: id },
+      include: ['author']
+    })
+
+    if (!comments) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+
+    res.json({ comments })
   }
 
   /**
@@ -127,8 +259,8 @@ class PostController {
    *                items:
    *                  type: string
    *                  format: binary
-   *              required:
-   *                - categoryid
+   *            required:
+   *              - categoryid
    *    responses:
    *      201:
    *        description: Successfully creates a post
@@ -181,16 +313,22 @@ class PostController {
         .json({ message: 'You must provide either a text or an image/video' })
     }
 
-    if (req.body.categoryid === undefined) {
+    if (req.body.categoryid === undefined || req.body.categoryid === '') {
       return res
         .status(400)
         .json({ message: 'You must provide the category of the post' })
     }
 
+    req.body.questionid =
+      req.body.questionid === undefined || req.body.questionid === ''
+        ? null
+        : req.body.questionid
+
     const uploaded = files.map(file => {
       const tipo = file.mimetype.split('/')[0]
 
-      file.path = `uploads/posts/${tipo}/${file.filename}`
+      file.name = file.filename
+      file.path = file.location
       file.tipo = tipo
 
       return file
@@ -204,6 +342,8 @@ class PostController {
     if (!post) {
       return res.status(500).json({ message: 'Unable to create post' })
     }
+
+    await this.increase(req.user)
 
     res.status(201).json({ post })
   }
@@ -317,7 +457,7 @@ class PostController {
     const transaction = await sequelize.transaction(async transaction => {
       await Promise.all([
         post.files.map(async file => {
-          if (!fileids.includes(file.id.toString())) {
+          if (fileids === undefined || !fileids.includes(file.id.toString())) {
             await file.destroy({ transaction })
           }
         })
@@ -329,7 +469,8 @@ class PostController {
 
           await post.createFile(
             {
-              path: `uploads/posts/${tipo}/${file.filename}`,
+              name: file.filename,
+              path: file.location,
               tipo
             },
             { transaction }
@@ -477,7 +618,7 @@ class PostController {
     const { id } = req.params
     const { increment } = req.body
 
-    const post = await Post.findOne({ where: { id } })
+    const post = await Post.findOne({ where: { id }, include: ['author'] })
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' })
@@ -485,7 +626,43 @@ class PostController {
 
     await post.increment(increment)
 
+    if (increment === 'n_util') {
+      await this.decrease(post.author)
+    } else {
+      await this.increase(post.author)
+    }
+
     res.json({ post })
+  }
+
+  async increase(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 1
+      })
+    } else {
+      await ranking.increment('points')
+    }
+  }
+
+  async decrease(user) {
+    const ranking = await Ranking.findOne({ where: { userid: user.id } })
+
+    if (!ranking) {
+      await Ranking.create({
+        userid: user.id,
+        type: `${user.curso} - ${user.ies}`,
+        points: 0
+      })
+    } else {
+      if (ranking.points > 0) {
+        await ranking.decrement('points')
+      }
+    }
   }
 }
 

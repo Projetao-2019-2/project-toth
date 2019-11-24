@@ -1,4 +1,4 @@
-const { Comment, Ranking } = require('../../models')
+const { Comment, Notification, Post, Ranking } = require('../../models')
 
 class CommentController {
   /**
@@ -59,7 +59,7 @@ class CommentController {
    *                  type: string
    */
   async create(req, res) {
-    const { id: userid } = req.user
+    const { id: userid, nome } = req.user
 
     req.body.userid = userid
 
@@ -67,6 +67,34 @@ class CommentController {
 
     if (!comment) {
       return res.status('500').json({ message: "Couldn't create comment." })
+    }
+
+    const post = await Post.findOne({ where: { id: req.body.postid } })
+
+    if (post) {
+      if (userid !== post.userid) {
+        await Notification.create({
+          texto: `${nome} comentou na sua postagem.`,
+          link: `posts/${post.id}`,
+          userid: post.userid
+        })
+      }
+
+      if (req.body.parentid) {
+        const parent = await Comment.findOne({
+          where: { id: req.body.parentid }
+        })
+
+        if (parent) {
+          if (userid !== parent.userid) {
+            await Notification.create({
+              texto: `${nome} respondeu seu comentário.`,
+              link: `posts/${parent.postid}`,
+              userid: parent.userid
+            })
+          }
+        }
+      }
     }
 
     await this.increase(req.user)
@@ -160,7 +188,7 @@ class CommentController {
     const { id } = req.params
     const comment = await Comment.findOne({
       where: { id },
-      include: ['post', 'author', 'parent', 'children'],
+      include: ['post', 'author', 'parent', 'children']
     })
 
     if (!comment) {
@@ -339,7 +367,7 @@ class CommentController {
       await Ranking.create({
         userid: user.id,
         type: `${user.curso} - ${user.ies}`,
-        points: 1,
+        points: 1
       })
     } else {
       await ranking.increment('points')

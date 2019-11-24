@@ -8,6 +8,8 @@ class NotificationController {
    *    tags:
    *      - Notifications
    *    description: Returns a list with all the notifications
+   *    security:
+   *      - bearerAuth: []
    *    produces:
    *      - application/json
    *    responses:
@@ -36,13 +38,17 @@ class NotificationController {
    *                  type: string
    */
   async list(req, res) {
-    const notifications = await Notification.findAll()
+    const { id: userid } = req.user
+
+    const notifications = await Notification.findAll({ where: { userid } })
 
     if (!notifications) {
       return res
         .status(500)
         .json({ message: 'Unable to get list of notifications' })
     }
+
+    await Notification.update({ visualizado: true }, { where: { userid } })
 
     res.json({ notifications })
   }

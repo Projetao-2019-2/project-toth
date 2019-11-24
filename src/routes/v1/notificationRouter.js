@@ -4,7 +4,7 @@ const { authorization } = require('../../middlewares')
 
 const { NotificationController } = require('../../controllers')
 
-router.get('/', NotificationController.list)
+router.get('/', authorization, NotificationController.list)
 router.get('/:id', NotificationController.view)
 router.post('/', NotificationController.create)
 router.put('/:id', authorization, NotificationController.update)

@@ -145,21 +145,21 @@ class UserController {
             include: [
               [
                 sequelize.literal(
-                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = true)`,
+                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = true)`
                 ),
-                'util',
+                'util'
               ],
               [
                 sequelize.literal(
-                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = false)`,
+                  `(SELECT COUNT(*) FROM ${PostEvaluation.tableName} l WHERE l.postid = posts.id AND evaluation = false)`
                 ),
-                'n_util',
-              ],
-            ],
+                'n_util'
+              ]
+            ]
           },
-          include: ['files', 'category', 'question'],
-        },
-      ],
+          include: ['files', 'category', 'question']
+        }
+      ]
     })
 
     if (!user) {
@@ -220,7 +220,7 @@ class UserController {
           FROM ${Ranking.tableName} r
           WHERE r.type = :type) sub
         WHERE userid = :id`,
-        { replacements: { id: id, type: `${curso} - ${ies}` } },
+        { replacements: { id: id, type: `${curso} - ${ies}` } }
       )
 
       if (!rnk) {
@@ -231,6 +231,76 @@ class UserController {
     } catch (error) {
       return res.status(500).json({ message: error.message })
     }
+  }
+
+  /**
+   * @swagger
+   * /users/likedPosts:
+   *  get:
+   *    tags:
+   *      - Users
+   *    description: Returns the posts liked by the logged user
+   *    security:
+   *      - bearerAuth: []
+   *    produces:
+   *      - application/json
+   *    responses:
+   *      200:
+   *        description: Successfully retrieves the posts liked by the user
+   *        schema:
+   *          $ref: '#/components/schemas/ExtendedPostModel'
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                posts:
+   *                  type: array
+   *                  items:
+   *                    type: object
+   *                    $ref: '#/components/schemas/ExtendedPostModel'
+   *      404:
+   *        description: The server was unable to find the user
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                message:
+   *                  type: string
+   */
+  async likedPosts(req, res) {
+    const { id } = req.user
+
+    const user = await User.findOne({
+      where: { id },
+      include: [
+        {
+          association: 'evaluations',
+          where: { evaluation: true },
+          include: [
+            {
+              association: 'post',
+              include: ['author', 'files', 'category', 'question']
+            }
+          ],
+          order: [[sequelize.col('ies'), 'ASC']],
+          required: false
+        }
+      ]
+    })
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    const { evaluations } = user
+
+    const likedPosts = evaluations.map(item => {
+      return item.post
+    })
+
+    res.json({ posts: likedPosts })
   }
 
   /**
@@ -339,7 +409,7 @@ class UserController {
       res.status(201).json({ user: user.returnObject() })
     } catch (err) {
       return res.status(500).json({
-        message: `An error occurred while trying to create user: ${err}`,
+        message: `An error occurred while trying to create user: ${err}`
       })
     }
   }
@@ -467,7 +537,7 @@ class UserController {
 
     if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
-        message: "You don't have permission to change this user's information",
+        message: "You don't have permission to change this user's information"
       })
     }
 
@@ -487,7 +557,14 @@ class UserController {
               console.error(response.message)
             }
           } else {
-            const filepath = path.resolve(__dirname, '..', '..', '..', 'public', user.imagepath)
+            const filepath = path.resolve(
+              __dirname,
+              '..',
+              '..',
+              '..',
+              'public',
+              user.imagepath
+            )
 
             fs.unlinkSync(filepath)
           }
@@ -572,7 +649,7 @@ class UserController {
 
     if (tipo !== 'admin' && id != userid) {
       return res.status(403).json({
-        message: "You don't have permission to delete this user",
+        message: "You don't have permission to delete this user"
       })
     }
 

@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   PostEvaluation.associate = function(models) {
-    PostEvaluation.belongsTo(models.Post)
+    PostEvaluation.belongsTo(models.Post, { as: 'post', foreignKe: 'postid' })
   }
   return PostEvaluation
 }

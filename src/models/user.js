@@ -80,6 +80,10 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = models => {
     User.hasMany(models.Post, { as: 'posts', foreignKey: 'userid' })
+    User.hasMany(models.PostEvaluation, {
+      as: 'evaluations',
+      foreignKey: 'userid'
+    })
     User.hasOne(models.Ranking, { as: 'ranking', foreignKey: 'userid' })
   }
 
